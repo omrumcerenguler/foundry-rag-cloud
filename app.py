@@ -282,15 +282,21 @@ def _render_response_observability(message: dict[str, object]) -> None:
 
 
 def _render_citation_inspector(sources: list[dict[str, object]]) -> None:
-    """Render expandable source passages with visual relevance strength."""
-    for index, source in enumerate(sources):
-        score = max(0.0, min(1.0, _float_value(source.get("score"))))
-        with st.expander(
-            f"Citation {index + 1} · {source.get('source_id', 'unknown')} · {score:.3f}"
-        ):
-            st.markdown(f"**Cosine relevance:** {score:.3f}")
+    """Render all grounded sources in one collapsed citation container."""
+    with st.expander(
+        f"📚 Source Citations & Match Context · {len(sources)} source(s)",
+        expanded=False,
+    ):
+        for source in sources:
+            score = max(0.0, min(1.0, _float_value(source.get("score"))))
+            source_id = html.escape(str(source.get("source_id", "unknown")))
+            st.markdown(
+                f'<div class="rag-citation-heading"><strong>{source_id}</strong>'
+                f'<span class="rag-citation-score">match {score:.3f}</span></div>',
+                unsafe_allow_html=True,
+            )
             st.progress(score, text=f"Relevance strength · {score:.0%}")
-            st.write(source.get("text", ""))
+            st.caption(str(source.get("text", "")))
 
 
 def _query_cache_key(prompt: str, threshold: float) -> str:
@@ -475,6 +481,21 @@ def main() -> None:
         .rag-copy-button:hover {
             border-color: var(--rag-cyan);
             color: var(--rag-ink);
+        }
+        .rag-citation-heading {
+            align-items: center;
+            display: flex;
+            gap: 0.55rem;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+        .rag-citation-score {
+            background: rgba(103, 232, 249, 0.09);
+            border: 1px solid rgba(103, 232, 249, 0.22);
+            border-radius: 999px;
+            color: #b9eeea;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.48rem;
         }
         [data-baseweb="tab-list"] {
             gap: 0.35rem;
