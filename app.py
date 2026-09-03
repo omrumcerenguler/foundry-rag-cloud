@@ -209,9 +209,25 @@ def main() -> None:
             mode = service.mode
         st.success(f"ACTIVE · {mode}")
         st.metric("Indexed chunks", cast(int, metadata.get("total_chunk_count", 0)))
-        st.caption(
-            f"Questions this session: {st.session_state['query_count']}/{MAX_SESSION_QUERIES}"
+        quota_used = min(
+            int(st.session_state["query_count"]), MAX_SESSION_QUERIES
         )
+        quota_remaining = MAX_SESSION_QUERIES - quota_used
+        st.metric(
+            "Session Quota",
+            f"{quota_remaining} / {MAX_SESSION_QUERIES} Remaining",
+            help="This per-session allowance protects the public demo's Azure credits while keeping the demo available for genuine visitors.",
+        )
+        st.progress(
+            quota_used / MAX_SESSION_QUERIES,
+            text=f"{quota_used} of {MAX_SESSION_QUERIES} questions used",
+        )
+        if quota_used >= MAX_SESSION_QUERIES:
+            st.error("Demo session limit reached. Please return later to try again.")
+        elif quota_used >= MAX_SESSION_QUERIES - 1:
+            st.warning(
+                f"Almost at the demo limit: {quota_remaining} question remaining."
+            )
         st.caption(
             f"Embedding: {cast(str, metadata.get('embedding_model', 'unknown'))}"
         )
