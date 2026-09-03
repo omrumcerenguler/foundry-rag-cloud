@@ -29,6 +29,10 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     needs: lint-and-type
+    env:
+      RAG_MODE: AZURE_CLOUD
+      AZURE_OPENAI_ENDPOINT: https://ci.example.test/
+      AZURE_OPENAI_API_KEY: ci-test-key
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
