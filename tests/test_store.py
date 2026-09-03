@@ -36,6 +36,13 @@ def test_cosine_similarity_ranking(tmp_path: Path) -> None:
     assert [result.source_id for result in results] == ["near", "far"]
 
 
+def test_database_parent_directories_are_created(tmp_path: Path) -> None:
+    database = tmp_path / "nested" / "stores" / "rag.db"
+    store = SQLiteVectorStore(str(database))
+    assert database.exists()
+    store.close()
+
+
 def test_atomic_replacement_rolls_back(tmp_path: Path) -> None:
     store = SQLiteVectorStore(str(tmp_path / "rag.db"))
     store.save_document("old", 0, "old", [1.0])

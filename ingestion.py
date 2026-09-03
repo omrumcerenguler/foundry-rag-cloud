@@ -17,13 +17,21 @@ logger = logging.getLogger(__name__)
 def _snapshot_directory(directory: Path) -> tuple[str, list[tuple[Path, str]]]:
     """Read valid files once and return their deterministic hash and contents."""
     records: list[tuple[str, bytes, str, Path]] = []
-    with os.scandir(directory) as entries:
-        for entry in entries:
-            path = Path(entry.path)
+    for current_root, directory_names, file_names in os.walk(directory):
+        current_path = Path(current_root)
+        directory_names[:] = [
+            name
+            for name in directory_names
+            if not name.startswith(".")
+            and not (current_path / name).is_symlink()
+        ]
+        for filename in sorted(file_names):
+            path = current_path / filename
+            relative_name = path.relative_to(directory).as_posix()
             if (
-                entry.is_symlink()
-                or not entry.is_file()
-                or entry.name.startswith(".")
+                filename.startswith(".")
+                or path.is_symlink()
+                or not path.is_file()
                 or path.suffix.lower() not in SUPPORTED_TEXT_SUFFIXES
             ):
                 continue
@@ -43,14 +51,14 @@ def _snapshot_directory(directory: Path) -> tuple[str, list[tuple[Path, str]]]:
                     extra={"path": str(path), "reason": type(exc).__name__},
                 )
                 continue
-            records.append((entry.name, raw_content, content, path))
+            records.append((relative_name, raw_content, content, path))
 
     digest = sha256()
     contents: list[tuple[Path, str]] = []
     for filename_text, raw_content, content, path in sorted(records):
-        filename = filename_text.encode("utf-8")
-        digest.update(f"{len(filename)}:".encode("ascii"))
-        digest.update(filename)
+        filename_bytes = filename_text.encode("utf-8")
+        digest.update(f"{len(filename_bytes)}:".encode("ascii"))
+        digest.update(filename_bytes)
         digest.update(f":{len(raw_content)}:".encode("ascii"))
         digest.update(raw_content)
         digest.update(b":")
@@ -84,11 +92,12 @@ def ingest_directory(
     resolved_chunker = chunker or DocumentChunker()
     chunks: list[DocumentChunk] = []
     for path, content in valid_contents:
+        source_name = path.relative_to(directory).as_posix()
         chunks.extend(
             resolved_chunker.chunk_text(
                 content,
-                path.name,
-                source_file=path.name,
+                source_name,
+                source_file=source_name,
                 corpus_hash=corpus_hash,
             )
         )

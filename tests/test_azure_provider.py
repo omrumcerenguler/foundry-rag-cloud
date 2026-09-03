@@ -59,3 +59,27 @@ def test_429_exhaustion_is_structured(monkeypatch) -> None:
         assert exc.retry_after == 0.0
     else:
         raise AssertionError("expected AzureRateLimitError")
+
+
+def test_5xx_retries_three_times(monkeypatch) -> None:
+    failures = [
+        HTTPError("url", 503, "server", Message(), io.BytesIO())
+        for _ in range(3)
+    ]
+    sleeps: list[float] = []
+
+    def fake_urlopen(_request, **_kwargs: object):
+        failures.pop(0)
+        raise HTTPError("url", 503, "server", Message(), io.BytesIO())
+
+    monkeypatch.setattr(azure, "urlopen", fake_urlopen)
+    monkeypatch.setattr(azure.time, "sleep", sleeps.append)
+    provider = AzureOpenAIEmbeddingProvider("https://example", "key", "v", "embed", 2)
+
+    try:
+        provider.embed_text("hello")
+    except azure.AzureServerError:
+        pass
+    else:
+        raise AssertionError("expected AzureServerError")
+    assert len(sleeps) == 2

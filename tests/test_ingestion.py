@@ -61,6 +61,21 @@ def test_binary_files_are_skipped(tmp_path: Path) -> None:
         ingest_directory(data, GoodEmbedding(), SQLiteVectorStore(str(tmp_path / "db")))
 
 
+def test_recursive_ingestion_uses_relative_source_paths(tmp_path: Path) -> None:
+    data = tmp_path / "data"
+    (data / "one").mkdir(parents=True)
+    (data / "two").mkdir()
+    (data / "one" / "doc.txt").write_text("one", encoding="utf-8")
+    (data / "two" / "doc.txt").write_text("two", encoding="utf-8")
+    store = SQLiteVectorStore(str(tmp_path / "db"))
+
+    ingest_directory(data, GoodEmbedding(), store)
+
+    results = store.search_similar([1.0, 0.0], 2)
+    assert {result.source_id for result in results} == {"one/doc.txt", "two/doc.txt"}
+    assert {result.source_file for result in results} == {"one/doc.txt", "two/doc.txt"}
+
+
 def test_provider_failure_preserves_existing_index(tmp_path: Path) -> None:
     data = tmp_path / "data"
     data.mkdir()

@@ -4,6 +4,7 @@ import json
 import math
 import sqlite3
 from collections.abc import Iterator
+from pathlib import Path
 from threading import RLock
 
 from core.models import DocumentChunk, SearchResult
@@ -24,6 +25,8 @@ class SQLiteVectorStore(BaseVectorStore):
         self.embedding_model = embedding_model
         self._lock = RLock()
         try:
+            if database_path != ":memory:":
+                Path(database_path).parent.mkdir(parents=True, exist_ok=True)
             self._connection = sqlite3.connect(
                 database_path, timeout=30.0, check_same_thread=False
             )
@@ -48,7 +51,7 @@ class SQLiteVectorStore(BaseVectorStore):
                 source_file TEXT, character_offset INTEGER NOT NULL, corpus_hash TEXT,
                 PRIMARY KEY (source_id, chunk_index))""")
             self._connection.commit()
-        except sqlite3.Error as exc:
+        except (OSError, sqlite3.Error) as exc:
             connection = getattr(self, "_connection", None)
             if connection is not None:
                 connection.close()

@@ -2,7 +2,7 @@ import pytest
 
 from core.models import RAGQueryRequest, SearchResult
 from core.ports import BaseChatProvider, BaseEmbeddingProvider, BaseVectorStore
-from core.service import RAGService
+from core.service import MAX_CONTEXT_CHARACTERS, RAGService
 
 
 class MockEmbedding(BaseEmbeddingProvider):
@@ -99,3 +99,17 @@ def test_uncited_model_answer_falls_back() -> None:
     )
     assert "could not find" in response.answer
     assert response.citations == []
+
+
+def test_grounded_prompt_has_a_character_budget() -> None:
+    result = SearchResult(
+        source_id="doc1",
+        chunk_index=0,
+        text="x" * (MAX_CONTEXT_CHARACTERS * 2),
+        score=0.9,
+    )
+
+    _, prompt = RAGService._build_grounded_prompt("question", [result])
+
+    context = prompt.split("\n\n<user_query>", 1)[0]
+    assert len(context.removeprefix("Sources:\n")) <= MAX_CONTEXT_CHARACTERS

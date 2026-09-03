@@ -510,8 +510,10 @@ def test_cosine_rejects_dimension_mismatch_and_handles_zero_candidate() -> None:
 
 
 def test_sqlite_initialization_and_save_failures_are_structured(tmp_path: Path) -> None:
-    with pytest.raises(RuntimeError, match="initialize SQLite store"):
-        SQLiteVectorStore(str(tmp_path / "missing" / "rag.db"))
+    nested_database = tmp_path / "missing" / "rag.db"
+    nested_store = SQLiteVectorStore(str(nested_database))
+    assert nested_database.exists()
+    nested_store.close()
 
     store = SQLiteVectorStore(str(tmp_path / "rag.db"))
     store.save_document("first", 0, "text", [1.0, 0.0])

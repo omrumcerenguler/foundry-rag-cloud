@@ -140,6 +140,9 @@ class _AzureProvider:
                         "Azure rate limit exceeded", retry_after
                     ) from exc
                 if 500 <= exc.code <= 599:
+                    if attempt < 2:
+                        time.sleep(2.0**attempt)
+                        continue
                     raise AzureServerError(f"Azure server error ({exc.code})") from exc
                 raise AzureProviderError(f"Azure request failed ({exc.code})") from exc
             except (

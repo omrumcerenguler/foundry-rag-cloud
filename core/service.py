@@ -9,6 +9,7 @@ from .models import RAGQueryRequest, RAGResponse, SearchResult
 from .ports import BaseChatProvider, BaseEmbeddingProvider, BaseVectorStore
 
 logger = logging.getLogger(__name__)
+MAX_CONTEXT_CHARACTERS = 12000
 
 
 class RAGService:
@@ -102,10 +103,20 @@ class RAGService:
         query: str, results: list[SearchResult]
     ) -> tuple[str, str]:
         """Build a prompt that explicitly constrains the answer to retrieved context."""
-        context = "\n\n".join(
-            f"[Source: {result.source_id}, chunk: {result.chunk_index}]\n{result.text}"
-            for result in results
-        )
+        context_parts: list[str] = []
+        remaining = MAX_CONTEXT_CHARACTERS
+        for result in results:
+            header = f"[Source: {result.source_id}, chunk: {result.chunk_index}]\n"
+            if remaining <= len(header):
+                break
+            separator = "\n\n" if context_parts else ""
+            available = remaining - len(separator) - len(header)
+            if available <= 0:
+                break
+            text = result.text[:available]
+            context_parts.append(f"{separator}{header}{text}")
+            remaining -= len(context_parts[-1])
+        context = "".join(context_parts)
         return (
             "You answer only from the supplied sources. If the sources do not support "
             "the answer, say so clearly and cite the source identifiers.",
