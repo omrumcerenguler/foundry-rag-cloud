@@ -1,7 +1,9 @@
 """Environment-backed, validated application configuration."""
 
+import importlib
 import os
 import sys
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Literal
 
@@ -9,6 +11,28 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
 BASE_DIR = Path(__file__).parent.resolve()
+
+
+def _load_streamlit_secrets() -> None:
+    """Expose flat Streamlit secrets as environment variables when available."""
+    streamlit = sys.modules.get("streamlit")
+    if streamlit is None:
+        try:
+            streamlit = importlib.import_module("streamlit")
+        except ImportError:
+            return
+    try:
+        secrets = getattr(streamlit, "secrets", None)
+        if not isinstance(secrets, Mapping):
+            return
+        for key, value in secrets.items():
+            if isinstance(key, str) and isinstance(value, (str, int, float, bool)):
+                os.environ.setdefault(key, str(value))
+    except Exception:
+        return
+
+
+_load_streamlit_secrets()
 load_dotenv(BASE_DIR / ".env")
 
 
