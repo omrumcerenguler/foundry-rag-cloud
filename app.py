@@ -220,6 +220,108 @@ def _consume_query_slot() -> bool:
 def main() -> None:
     """Render the RAG chat application."""
     st.set_page_config(page_title="Enterprise Hybrid RAG", page_icon="R", layout="wide")
+    st.markdown(
+        """
+        <style>
+        :root {
+            --rag-ink: #e7edf5;
+            --rag-muted: #91a0b5;
+            --rag-panel: #111a27;
+            --rag-line: #263448;
+            --rag-accent: #55c2b8;
+            --rag-accent-soft: rgba(85, 194, 184, 0.14);
+        }
+        .rag-hero {
+            padding: 1.1rem 0 0.8rem;
+            border-bottom: 1px solid var(--rag-line);
+            margin-bottom: 1.1rem;
+        }
+        .rag-hero h1 {
+            color: var(--rag-ink);
+            font-size: clamp(2rem, 4vw, 3.15rem);
+            letter-spacing: 0;
+            line-height: 1.05;
+            margin: 0;
+        }
+        .rag-hero p {
+            color: var(--rag-muted);
+            font-size: 1rem;
+            margin: 0.55rem 0 0;
+        }
+        .rag-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            margin-top: 0.9rem;
+        }
+        .rag-badge {
+            background: var(--rag-accent-soft);
+            border: 1px solid rgba(85, 194, 184, 0.35);
+            border-radius: 999px;
+            color: #b9eee8;
+            font-size: 0.76rem;
+            font-weight: 600;
+            padding: 0.35rem 0.65rem;
+        }
+        [data-testid="stMetric"] {
+            background: var(--rag-panel);
+            border: 1px solid var(--rag-line);
+            border-radius: 9px;
+            padding: 0.75rem 0.9rem;
+        }
+        [data-testid="stExpander"] {
+            border-color: var(--rag-line);
+            border-radius: 9px;
+        }
+        [data-testid="stExpanderDetails"] {
+            background: rgba(17, 26, 39, 0.48);
+        }
+        [data-baseweb="tab-list"] {
+            gap: 0.35rem;
+            border-bottom: 1px solid var(--rag-line);
+        }
+        [data-baseweb="tab"] {
+            color: var(--rag-muted);
+            min-height: 3rem;
+            padding: 0.6rem 0.85rem;
+        }
+        [aria-selected="true"][data-baseweb="tab"] {
+            color: var(--rag-ink);
+        }
+        [data-baseweb="tab-highlight"] {
+            background: var(--rag-accent);
+            height: 3px;
+        }
+        .stButton > button {
+            border: 1px solid var(--rag-line);
+            border-radius: 9px;
+            min-height: 3.8rem;
+            transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+        }
+        .stButton > button:hover {
+            background: var(--rag-accent-soft);
+            border-color: var(--rag-accent);
+            transform: translateY(-1px);
+        }
+        .rag-empty-state {
+            background: linear-gradient(135deg, rgba(17, 26, 39, 0.92), rgba(24, 39, 52, 0.78));
+            border: 1px solid var(--rag-line);
+            border-left: 3px solid var(--rag-accent);
+            border-radius: 9px;
+            color: var(--rag-muted);
+            margin: 0.4rem 0 1.25rem;
+            padding: 1rem 1.15rem;
+        }
+        .rag-empty-state strong {
+            color: var(--rag-ink);
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
     st.session_state.setdefault("messages", [])
     st.session_state.setdefault("query_count", 0)
     st.session_state.setdefault("last_query_at", 0.0)
@@ -245,6 +347,11 @@ def main() -> None:
         if service is not None:
             mode = service.mode
         st.success(f"ACTIVE · {mode}")
+        st.link_button(
+            "GitHub Repository",
+            "https://github.com/omrumcerenguler/foundry-rag-cloud",
+            use_container_width=True,
+        )
         st.metric("Indexed chunks", cast(int, metadata.get("total_chunk_count", 0)))
         quota_used = min(
             int(st.session_state["query_count"]), MAX_SESSION_QUERIES
@@ -301,8 +408,33 @@ def main() -> None:
                 st.rerun()
             except (RuntimeError, ValueError, OSError):
                 st.error(_friendly_error("Document ingestion failed. Check the data directory and service status."))
-    st.title("Grounded Knowledge Assistant")
-    for message in st.session_state.get("messages", []):
+    st.markdown(
+        """
+        <section class="rag-hero">
+            <h1>Grounded Knowledge Assistant</h1>
+            <p>Enterprise Grounded RAG with Hybrid Search &amp; Deterministic Citations</p>
+            <div class="rag-badges">
+                <span class="rag-badge">Azure OpenAI · gpt-4.1-mini</span>
+                <span class="rag-badge">SQLite Vector</span>
+                <span class="rag-badge">Session Rate-Limited</span>
+            </div>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+    messages = st.session_state.get("messages", [])
+    if not messages:
+        st.markdown(
+            """
+            <div class="rag-empty-state">
+                <strong>Ready when you are</strong>
+                Choose a suggested question below or ask about the indexed knowledge base.
+                Answers include grounded source citations when the documents support them.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    for message in messages:
         with st.chat_message(message["role"]):
             st.markdown(message["answer"])
             if message.get("sources"):
