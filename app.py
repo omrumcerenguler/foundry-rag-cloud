@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+from time import monotonic
 from typing import Any, cast
 
 import httpx
@@ -54,6 +55,10 @@ SUGGESTED_QUESTIONS = (
     "What setup is recommended for local AI development on Apple Silicon?",
     "What are the three phases of the local RAG AI assistant project plan?",
 )
+
+MAX_SESSION_QUERIES = 8
+QUERY_COOLDOWN_SECONDS = 4.0
+QueryResult = tuple[str, list[dict[str, object]], float]
 
 
 def _friendly_error(prefix: str) -> str:
@@ -150,10 +155,38 @@ def _append_query_messages(
     del messages[:-30]
 
 
+def _query_cache_key(prompt: str, threshold: float) -> str:
+    """Build a stable cache key for an equivalent prompt configuration."""
+    return f"{prompt.strip().casefold()}::{threshold:.4f}"
+
+
+def _consume_query_slot() -> bool:
+    """Enforce per-session quota and cooldown before an external query."""
+    now = monotonic()
+    query_count = int(st.session_state.get("query_count", 0))
+    if query_count >= MAX_SESSION_QUERIES:
+        st.warning(
+            f"Session limit reached ({MAX_SESSION_QUERIES} questions). Please return later."
+        )
+        return False
+    last_query_at = float(st.session_state.get("last_query_at", 0.0))
+    elapsed = now - last_query_at
+    if last_query_at and elapsed < QUERY_COOLDOWN_SECONDS:
+        remaining = QUERY_COOLDOWN_SECONDS - elapsed
+        st.warning(f"Please wait {remaining:.1f} seconds before asking another question.")
+        return False
+    st.session_state["query_count"] = query_count + 1
+    st.session_state["last_query_at"] = now
+    return True
+
+
 def main() -> None:
     """Render the RAG chat application."""
     st.set_page_config(page_title="Enterprise Hybrid RAG", page_icon="R", layout="wide")
     st.session_state.setdefault("messages", [])
+    st.session_state.setdefault("query_count", 0)
+    st.session_state.setdefault("last_query_at", 0.0)
+    st.session_state.setdefault("query_cache", {})
     api_mode = bool(os.getenv("RAG_API_URL", "").strip())
     try:
         service = None if api_mode else get_service()
@@ -176,6 +209,9 @@ def main() -> None:
             mode = service.mode
         st.success(f"ACTIVE · {mode}")
         st.metric("Indexed chunks", cast(int, metadata.get("total_chunk_count", 0)))
+        st.caption(
+            f"Questions this session: {st.session_state['query_count']}/{MAX_SESSION_QUERIES}"
+        )
         st.caption(
             f"Embedding: {cast(str, metadata.get('embedding_model', 'unknown'))}"
         )
@@ -227,12 +263,18 @@ def main() -> None:
     prompt = st.session_state.pop("pending_prompt", None)
     if prompt is None:
         prompt = st.chat_input("Ask a question about your documents")
-    if prompt:
+    if prompt and _consume_query_slot():
         messages = st.session_state.setdefault("messages", [])
         try:
-            answer, sources, latency_seconds = _query_service(
-                service, api_mode, prompt, threshold
-            )
+            cache_key = _query_cache_key(prompt, threshold)
+            query_cache = cast(dict[str, QueryResult], st.session_state["query_cache"])
+            if cache_key in query_cache:
+                answer, sources, latency_seconds = query_cache[cache_key]
+            else:
+                answer, sources, latency_seconds = _query_service(
+                    service, api_mode, prompt, threshold
+                )
+                query_cache[cache_key] = (answer, sources, latency_seconds)
             _append_query_messages(
                 prompt, messages, answer, sources, latency_seconds
             )
