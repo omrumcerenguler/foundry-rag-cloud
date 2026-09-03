@@ -1,0 +1,10 @@
+{
+  "python-envs.defaultEnvManager": "ms-python.python:venv",
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportUnusedImport": "none",
+    "reportUnusedParameter": "none",
+    "reportUnusedVariable": "none",
+    "reportUnusedFunction": "none"
+  },
+  "python.analysis.disableTaggedHints": true
+}

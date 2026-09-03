@@ -1,0 +1,3 @@
+Apple Silicon Compatibility
+
+On Apple Silicon Macs, use an ARM64 Python interpreter and packages that provide macOS arm64 wheels. Foundry Local can run supported models locally, and a virtual environment keeps the runtime reproducible.

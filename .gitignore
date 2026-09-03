@@ -1,0 +1,36 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*api_key*
+*API_KEY*
+*secret*
+*SECRET*
+*.pem
+*.key
+
+# Local runtime data
+*.db
+*.db-shm
+*.db-wal
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/rag.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local model files
+models/
+
+# OS/editor files
+.DS_Store
+.vscode/*.log

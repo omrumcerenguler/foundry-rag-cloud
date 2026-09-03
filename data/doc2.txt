@@ -1,0 +1,3 @@
+Python Virtual Environments
+
+A Python virtual environment isolates project dependencies from the system interpreter. Create one with python3 -m venv .venv, activate it, and install the pinned project requirements inside it.

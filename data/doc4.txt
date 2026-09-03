@@ -1,0 +1,3 @@
+SQLite Knowledge Bases
+
+SQLite is a dependable embedded database for a small local knowledge base. Text can be stored with its JSON-serialized embedding, while Python performs cosine similarity over the loaded vectors.

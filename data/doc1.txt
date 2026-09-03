@@ -1,0 +1,3 @@
+Local AI Development
+
+Offline AI applications run inference on the developer's own computer. This keeps prompts and documents local, removes network dependency, and makes repeatable development possible.

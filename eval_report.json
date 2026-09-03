@@ -1,0 +1,21 @@
+{
+  "mode": "AZURE_CLOUD",
+  "question_count": 2,
+  "retrieval_top_k_hit_rate": 0.5,
+  "average_latency_seconds": 2.5620030625032086,
+  "citation_correctness": 0.5,
+  "questions": [
+    {
+      "question": "1. What is local AI development and why is it useful?\u2060",
+      "top_k_hit": true,
+      "latency_seconds": 4.47611158300424,
+      "citation_correct": true
+    },
+    {
+      "question": "2. What is the capital of France?",
+      "top_k_hit": false,
+      "latency_seconds": 0.6478945420021773,
+      "citation_correct": false
+    }
+  ]
+}

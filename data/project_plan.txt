@@ -1,0 +1,10 @@
+One-Month Project Plan: Local RAG AI Assistant with Microsoft Foundry Local
+
+Phase 1: Foundations (Weeks 1–2)
+Learn RAG basics and set up Foundry Local on Windows & macOS. Cover embeddings, vector search, SQLite, and prompt design.
+
+Phase 2: Build Project (Weeks 3–4)
+1–2 weeks of coding a local Q&A assistant. Implement document ingestion, retrieval pipeline, and LLM integration via Foundry Local.
+
+Phase 3: Testing & Wrap-up (Weeks 5–6)
+1–2 weeks for final project testing (functional & evaluation) and writing comprehensive documentation. Final demo and presentation.
