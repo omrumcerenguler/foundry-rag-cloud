@@ -1,5 +1,6 @@
 import json
 import sqlite3
+import sys
 from email.message import Message
 from io import BytesIO
 from pathlib import Path
@@ -11,6 +12,7 @@ import pytest
 
 import evaluate
 import main
+import config
 import providers.azure_openai as azure
 from api import QueryRequest
 from config import Settings
@@ -91,6 +93,26 @@ def test_foundry_model_path_is_loaded_from_environment(
 ) -> None:
     monkeypatch.setenv("FOUNDRY_MODEL_PATH", "/models")
     assert Settings.from_env().foundry_model_path == "/models"
+
+
+def test_streamlit_secrets_bridge_populates_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("RAG_MODE", raising=False)
+    monkeypatch.delenv("AZURE_OPENAI_ENDPOINT", raising=False)
+    monkeypatch.setitem(
+        sys.modules,
+        "streamlit",
+        SimpleNamespace(
+            secrets={
+                "RAG_MODE": "AZURE_CLOUD",
+                "AZURE_OPENAI_ENDPOINT": "https://ci.example.test/",
+            }
+        ),
+    )
+    config._load_streamlit_secrets()
+    assert Settings.from_env().rag_mode == "AZURE_CLOUD"
+    assert Settings.from_env().azure_endpoint == "https://ci.example.test/"
 
 
 @pytest.mark.parametrize("query", ["   ", "\x00"])
