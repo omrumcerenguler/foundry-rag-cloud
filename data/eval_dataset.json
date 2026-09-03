@@ -1,0 +1,17 @@
+[
+  {
+    "question": "Why is local AI development useful for privacy and repeatable development?",
+    "relevant_sources": ["doc1.txt"],
+    "answer_terms": ["local", "network"]
+  },
+  {
+    "question": "What steps does the RAG ingestion pipeline perform before search?",
+    "relevant_sources": ["doc3.txt"],
+    "answer_terms": ["embedding", "vector"]
+  },
+  {
+    "question": "What are the three phases of the local RAG AI assistant project plan?",
+    "relevant_sources": ["project_plan.txt"],
+    "answer_terms": ["Foundations", "Build Project", "Testing & Wrap-up"]
+  }
+]
