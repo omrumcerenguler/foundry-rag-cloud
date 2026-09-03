@@ -22,8 +22,7 @@ def _snapshot_directory(directory: Path) -> tuple[str, list[tuple[Path, str]]]:
         directory_names[:] = [
             name
             for name in directory_names
-            if not name.startswith(".")
-            and not (current_path / name).is_symlink()
+            if not name.startswith(".") and not (current_path / name).is_symlink()
         ]
         for filename in sorted(file_names):
             path = current_path / filename

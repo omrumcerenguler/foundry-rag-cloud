@@ -10,9 +10,9 @@ from urllib.error import HTTPError, URLError
 
 import pytest
 
+import config
 import evaluate
 import main
-import config
 import providers.azure_openai as azure
 from api import QueryRequest
 from config import Settings

@@ -63,8 +63,7 @@ def test_429_exhaustion_is_structured(monkeypatch) -> None:
 
 def test_5xx_retries_three_times(monkeypatch) -> None:
     failures = [
-        HTTPError("url", 503, "server", Message(), io.BytesIO())
-        for _ in range(3)
+        HTTPError("url", 503, "server", Message(), io.BytesIO()) for _ in range(3)
     ]
     sleeps: list[float] = []
 
