@@ -1,5 +1,7 @@
 """Streamlit interface for interactive grounded conversations."""
 
+import html
+import json
 import os
 from pathlib import Path
 from time import monotonic
@@ -142,34 +144,46 @@ def _query_service(
     threshold: float,
 ) -> tuple[str, list[dict[str, object]], float]:
     """Run one query through the configured API or direct service path."""
-    with st.spinner("Thinking & retrieving sources..."):
-        if api_mode:
-            response_data = _api_request(
-                "POST",
-                "/query",
-                json={
-                    "query": prompt,
-                    "temperature": 0.0,
-                    "confidence_threshold": threshold,
-                },
+    with st.status(
+        "🔍 Retrieving relevant chunks from SQLite Vector Store...", expanded=False
+    ) as status:
+        try:
+            if api_mode:
+                response_data = _api_request(
+                    "POST",
+                    "/query",
+                    json={
+                        "query": prompt,
+                        "temperature": 0.0,
+                        "confidence_threshold": threshold,
+                    },
+                )
+                result = (
+                    cast(str, response_data["answer"]),
+                    cast(list[dict[str, object]], response_data.get("sources", [])),
+                    cast(float, response_data.get("latency_seconds", 0.0)),
+                )
+            else:
+                if service is None:
+                    raise RuntimeError("direct service is unavailable")
+                response = service.query(
+                    RAGQueryRequest(
+                        query=prompt, temperature=0.0, confidence_threshold=threshold
+                    )
+                )
+                result = (
+                    response.answer,
+                    [item.model_dump() for item in response.sources],
+                    response.latency_seconds,
+                )
+            status.update(
+                label="⚡ Synthesizing grounded answer via Azure OpenAI...",
+                state="complete",
             )
-            return (
-                cast(str, response_data["answer"]),
-                cast(list[dict[str, object]], response_data.get("sources", [])),
-                cast(float, response_data.get("latency_seconds", 0.0)),
-            )
-        if service is None:
-            raise RuntimeError("direct service is unavailable")
-        response = service.query(
-            RAGQueryRequest(
-                query=prompt, temperature=0.0, confidence_threshold=threshold
-            )
-        )
-        return (
-            response.answer,
-            [item.model_dump() for item in response.sources],
-            response.latency_seconds,
-        )
+            return result
+        except Exception:
+            status.update(label="Query failed", state="error")
+            raise
 
 
 def _append_query_messages(
@@ -178,18 +192,105 @@ def _append_query_messages(
     answer: str,
     sources: list[dict[str, object]],
     latency_seconds: float,
+    observability: dict[str, object] | None = None,
 ) -> None:
     """Append a user query and its grounded response within the history bound."""
     messages.append({"role": "user", "answer": prompt})
-    messages.append(
-        {
-            "role": "assistant",
-            "answer": answer,
-            "sources": sources,
-            "latency_seconds": latency_seconds,
-        }
-    )
+    assistant_message: dict[str, object] = {
+        "role": "assistant",
+        "answer": answer,
+        "sources": sources,
+        "latency_seconds": latency_seconds,
+    }
+    if observability is not None:
+        assistant_message["observability"] = observability
+    messages.append(assistant_message)
     del messages[:-30]
+
+
+def _float_value(value: object, default: float = 0.0) -> float:
+    """Read a numeric metadata value without trusting persisted session data."""
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        try:
+            return float(value)
+        except ValueError:
+            return default
+    return default
+
+
+def _int_value(value: object, default: int = 0) -> int:
+    """Read an integer metadata value without trusting persisted session data."""
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        try:
+            return int(value)
+        except ValueError:
+            return default
+    return default
+
+
+def _conversation_markdown(messages: list[dict[str, object]]) -> str:
+    """Serialize the current conversation into a portable Markdown report."""
+    sections = ["# Grounded RAG Conversation", ""]
+    for message in messages:
+        role = str(message.get("role", "message")).title()
+        sections.append(f"## {role}")
+        sections.append(str(message.get("answer", "")))
+        if role == "Assistant" and message.get("sources"):
+            sections.append("\n**Sources:**")
+            for source in cast(list[dict[str, object]], message["sources"]):
+                sections.append(
+                    f"- {source.get('source_id', 'unknown')} (score: {_float_value(source.get('score')):.3f})"
+                )
+        sections.append("")
+    return "\n".join(sections)
+
+
+def _render_copy_button(answer: str) -> None:
+    """Render a browser clipboard action for one assistant response."""
+    encoded_answer = html.escape(json.dumps(answer), quote=True)
+    st.markdown(
+        f'<button class="rag-copy-button" type="button" onclick="navigator.clipboard.writeText({encoded_answer})">Copy answer</button>',
+        unsafe_allow_html=True,
+    )
+
+
+def _render_response_observability(message: dict[str, object]) -> None:
+    """Render compact telemetry pills for an assistant response."""
+    telemetry = cast(dict[str, object], message.get("observability", {}))
+    latency_ms = _float_value(telemetry.get("latency_ms"))
+    confidence = _float_value(telemetry.get("confidence"))
+    match_count = _int_value(telemetry.get("match_count"))
+    model = str(telemetry.get("model", "unknown"))
+    cache = str(telemetry.get("cache", "MISS"))
+    st.markdown(
+        "<div class=\"rag-observability\">"
+        f"<span>Latency {latency_ms:.0f} ms</span>"
+        f"<span>Confidence {confidence:.3f}</span>"
+        f"<span>{match_count} match{'es' if match_count != 1 else ''}</span>"
+        f"<span>{html.escape(model)}</span>"
+        f"<span class=\"rag-cache-{cache.lower()}\">Cache {html.escape(cache)}</span>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+    _render_copy_button(str(message.get("answer", "")))
+
+
+def _render_citation_inspector(sources: list[dict[str, object]]) -> None:
+    """Render expandable source passages with visual relevance strength."""
+    for index, source in enumerate(sources):
+        score = max(0.0, min(1.0, _float_value(source.get("score"))))
+        with st.expander(
+            f"Citation {index + 1} · {source.get('source_id', 'unknown')} · {score:.3f}"
+        ):
+            st.markdown(f"**Cosine relevance:** {score:.3f}")
+            st.progress(score, text=f"Relevance strength · {score:.0%}")
+            st.write(source.get("text", ""))
 
 
 def _query_cache_key(prompt: str, threshold: float) -> str:
@@ -342,6 +443,39 @@ def main() -> None:
             font-size: 0.68rem;
             padding: 0.2rem 0.45rem;
         }
+        .rag-observability {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin: 0.55rem 0 0.2rem;
+        }
+        .rag-observability span {
+            background: rgba(103, 232, 249, 0.08);
+            border: 1px solid rgba(103, 232, 249, 0.2);
+            border-radius: 999px;
+            color: #b9c8dd;
+            font-size: 0.69rem;
+            padding: 0.24rem 0.5rem;
+        }
+        .rag-observability .rag-cache-hit {
+            background: rgba(52, 211, 153, 0.1);
+            border-color: rgba(52, 211, 153, 0.3);
+            color: #a7f3d0;
+        }
+        .rag-copy-button {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 7px;
+            color: var(--rag-muted);
+            cursor: pointer;
+            font-size: 0.7rem;
+            padding: 0.25rem 0.55rem;
+            transition: color 160ms ease, border-color 160ms ease;
+        }
+        .rag-copy-button:hover {
+            border-color: var(--rag-cyan);
+            color: var(--rag-ink);
+        }
         [data-baseweb="tab-list"] {
             gap: 0.35rem;
             border-bottom: 1px solid rgba(129, 140, 248, 0.2);
@@ -429,6 +563,18 @@ def main() -> None:
         st.link_button(
             "GitHub Repository",
             "https://github.com/omrumcerenguler/foundry-rag-cloud",
+            use_container_width=True,
+        )
+        if st.button("Clear Conversation", use_container_width=True):
+            st.session_state["messages"] = []
+            st.rerun()
+        st.download_button(
+            "Download Conversation / Report",
+            data=_conversation_markdown(
+                cast(list[dict[str, object]], st.session_state["messages"])
+            ),
+            file_name="grounded-rag-conversation.md",
+            mime="text/markdown",
             use_container_width=True,
         )
         st.metric("Indexed chunks", cast(int, metadata.get("total_chunk_count", 0)))
@@ -524,13 +670,11 @@ def main() -> None:
         with st.chat_message(message["role"]):
             st.markdown(message["answer"])
             if message.get("sources"):
-                with st.expander("Sources"):
-                    for source in message["sources"]:
-                        st.caption(
-                            f"{source['source_id']} · score {source['score']:.3f}"
-                        )
-                        st.write(source["text"])
-                    st.caption(f"Latency: {message['latency_seconds']:.3f}s")
+                _render_citation_inspector(
+                    cast(list[dict[str, object]], message["sources"])
+                )
+            if message.get("observability"):
+                _render_response_observability(message)
 
     st.subheader("💡 Suggested Questions")
     question_tabs = st.tabs([category for category, _ in QUESTION_LIBRARY])
@@ -553,7 +697,8 @@ def main() -> None:
         try:
             cache_key = _query_cache_key(prompt, threshold)
             query_cache = cast(dict[str, QueryResult], st.session_state["query_cache"])
-            if cache_key in query_cache:
+            cache_hit = cache_key in query_cache
+            if cache_hit:
                 answer, sources, latency_seconds = query_cache[cache_key]
             else:
                 answer, sources, latency_seconds = _query_service(
@@ -561,7 +706,25 @@ def main() -> None:
                 )
                 query_cache[cache_key] = (answer, sources, latency_seconds)
             _append_query_messages(
-                prompt, messages, answer, sources, latency_seconds
+                prompt,
+                messages,
+                answer,
+                sources,
+                latency_seconds,
+                {
+                    "latency_ms": latency_seconds * 1000,
+                    "confidence": max(
+                        (_float_value(source.get("score")) for source in sources),
+                        default=0.0,
+                    ),
+                    "match_count": len(sources),
+                    "model": (
+                        settings.azure_chat_deployment
+                        if settings.rag_mode == "AZURE_CLOUD"
+                        else settings.local_chat_model
+                    ),
+                    "cache": "HIT" if cache_hit else "MISS",
+                },
             )
         except RuntimeError as exc:
             error_message = str(exc)
