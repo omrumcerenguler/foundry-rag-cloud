@@ -22,7 +22,7 @@ COPY --chown=root:root healthcheck.py /usr/local/bin/healthcheck.py
 RUN addgroup --gid 10001 appgroup \
     && adduser --uid 10001 --gid 10001 --disabled-password --gecos "" appuser \
     && mkdir -p /app/data /home/appuser \
-    && chown -R appuser:appuser /app/data /home/appuser \
+    && chown -R appuser:appgroup /app/data /home/appuser \
     && chmod -R a=rX /app \
     && chmod -R u=rwX,go=rX /app/data
 USER appuser
