@@ -224,28 +224,45 @@ def main() -> None:
         """
         <style>
         :root {
-            --rag-ink: #e7edf5;
-            --rag-muted: #91a0b5;
-            --rag-panel: #111a27;
-            --rag-line: #263448;
-            --rag-accent: #55c2b8;
-            --rag-accent-soft: rgba(85, 194, 184, 0.14);
+            --rag-ink: #f3f7ff;
+            --rag-muted: #9baac0;
+            --rag-panel: rgba(17, 25, 39, 0.72);
+            --rag-panel-strong: rgba(22, 31, 49, 0.92);
+            --rag-line: rgba(255, 255, 255, 0.11);
+            --rag-cyan: #67e8f9;
+            --rag-indigo: #818cf8;
+            --rag-violet: #a78bfa;
+            --rag-accent-soft: rgba(99, 102, 241, 0.14);
+        }
+        [data-testid="stAppViewContainer"] {
+            background:
+                radial-gradient(circle at 88% 8%, rgba(99, 102, 241, 0.13), transparent 28rem),
+                radial-gradient(circle at 12% 92%, rgba(34, 211, 238, 0.08), transparent 24rem),
+                #080d16;
+        }
+        [data-testid="stSidebar"] {
+            background: linear-gradient(180deg, rgba(11, 17, 29, 0.97), rgba(10, 14, 24, 0.93));
+            border-right: 1px solid var(--rag-line);
         }
         .rag-hero {
-            padding: 1.1rem 0 0.8rem;
-            border-bottom: 1px solid var(--rag-line);
+            padding: 1.35rem 0 1rem;
+            border-bottom: 1px solid rgba(129, 140, 248, 0.2);
             margin-bottom: 1.1rem;
         }
         .rag-hero h1 {
-            color: var(--rag-ink);
-            font-size: clamp(2rem, 4vw, 3.15rem);
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 3rem;
             letter-spacing: 0;
-            line-height: 1.05;
+            line-height: 1.08;
             margin: 0;
         }
         .rag-hero p {
             color: var(--rag-muted);
-            font-size: 1rem;
+            font-size: 1.02rem;
+            letter-spacing: 0;
             margin: 0.55rem 0 0;
         }
         .rag-badges {
@@ -255,30 +272,79 @@ def main() -> None:
             margin-top: 0.9rem;
         }
         .rag-badge {
-            background: var(--rag-accent-soft);
-            border: 1px solid rgba(85, 194, 184, 0.35);
+            background: linear-gradient(135deg, rgba(103, 232, 249, 0.11), rgba(167, 139, 250, 0.11));
+            border: 1px solid rgba(129, 140, 248, 0.3);
             border-radius: 999px;
-            color: #b9eee8;
+            color: #d6e4ff;
             font-size: 0.76rem;
             font-weight: 600;
             padding: 0.35rem 0.65rem;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
         [data-testid="stMetric"] {
-            background: var(--rag-panel);
-            border: 1px solid var(--rag-line);
+            background: linear-gradient(135deg, rgba(20, 31, 49, 0.88), rgba(14, 21, 35, 0.78));
+            border: 1px solid rgba(103, 232, 249, 0.22);
             border-radius: 9px;
-            padding: 0.75rem 0.9rem;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            min-width: 0;
+            overflow: visible;
+            padding: 0.8rem 0.85rem;
+        }
+        [data-testid="stMetricLabel"] {
+            color: var(--rag-muted);
+        }
+        [data-testid="stMetricValue"] {
+            color: var(--rag-ink);
+            font-size: clamp(1rem, 2.1vw, 1.55rem);
+            white-space: nowrap;
         }
         [data-testid="stExpander"] {
+            background: rgba(255, 255, 255, 0.025);
             border-color: var(--rag-line);
             border-radius: 9px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
         }
         [data-testid="stExpanderDetails"] {
-            background: rgba(17, 26, 39, 0.48);
+            background: rgba(12, 19, 32, 0.58);
+        }
+        .rag-status {
+            align-items: center;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(6, 78, 59, 0.3));
+            border: 1px solid rgba(52, 211, 153, 0.38);
+            border-radius: 999px;
+            color: #a7f3d0;
+            display: inline-flex;
+            font-size: 0.76rem;
+            font-weight: 700;
+            gap: 0.45rem;
+            letter-spacing: 0.04em;
+            padding: 0.42rem 0.7rem;
+        }
+        .rag-status::before {
+            background: #34d399;
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.14), 0 0 13px rgba(52, 211, 153, 0.85);
+            content: "";
+            height: 0.48rem;
+            width: 0.48rem;
+        }
+        .rag-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            margin-top: 0.45rem;
+        }
+        .rag-tag {
+            background: rgba(129, 140, 248, 0.12);
+            border: 1px solid rgba(129, 140, 248, 0.28);
+            border-radius: 999px;
+            color: #c7d2fe;
+            font-size: 0.68rem;
+            padding: 0.2rem 0.45rem;
         }
         [data-baseweb="tab-list"] {
             gap: 0.35rem;
-            border-bottom: 1px solid var(--rag-line);
+            border-bottom: 1px solid rgba(129, 140, 248, 0.2);
         }
         [data-baseweb="tab"] {
             color: var(--rag-muted);
@@ -289,26 +355,31 @@ def main() -> None:
             color: var(--rag-ink);
         }
         [data-baseweb="tab-highlight"] {
-            background: var(--rag-accent);
+            background: linear-gradient(90deg, var(--rag-cyan), var(--rag-indigo));
             height: 3px;
         }
         .stButton > button {
-            border: 1px solid var(--rag-line);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 9px;
+            color: var(--rag-ink);
             min-height: 3.8rem;
-            transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+            transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
         }
         .stButton > button:hover {
-            background: var(--rag-accent-soft);
-            border-color: var(--rag-accent);
-            transform: translateY(-1px);
+            background: rgba(99, 102, 241, 0.12);
+            border-color: rgba(129, 140, 248, 0.72);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+            color: #ffffff;
+            transform: translateY(-2px);
         }
         .rag-empty-state {
-            background: linear-gradient(135deg, rgba(17, 26, 39, 0.92), rgba(24, 39, 52, 0.78));
-            border: 1px solid var(--rag-line);
-            border-left: 3px solid var(--rag-accent);
+            background: linear-gradient(135deg, rgba(20, 31, 49, 0.84), rgba(42, 31, 72, 0.54));
+            border: 1px solid rgba(129, 140, 248, 0.28);
+            border-left: 3px solid var(--rag-cyan);
             border-radius: 9px;
-            color: var(--rag-muted);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            color: #b4c1d4;
             margin: 0.4rem 0 1.25rem;
             padding: 1rem 1.15rem;
         }
@@ -317,6 +388,11 @@ def main() -> None:
             display: block;
             font-size: 1rem;
             margin-bottom: 0.25rem;
+        }
+        @media (max-width: 640px) {
+            .rag-hero h1 {
+                font-size: 2rem;
+            }
         }
         </style>
         """,
@@ -346,7 +422,10 @@ def main() -> None:
         mode = "API"
         if service is not None:
             mode = service.mode
-        st.success(f"ACTIVE · {mode}")
+        st.markdown(
+            f'<div class="rag-status">ACTIVE · {mode}</div>',
+            unsafe_allow_html=True,
+        )
         st.link_button(
             "GitHub Repository",
             "https://github.com/omrumcerenguler/foundry-rag-cloud",
@@ -388,7 +467,14 @@ def main() -> None:
                     st.markdown(f"**Scope:** {scope}")
                     st.markdown(f"**Summary:** {summary}")
                     st.markdown(
-                        "**Key Concepts:** " + ", ".join(key_concepts)
+                        "**Key Concepts:** "
+                        + '<div class="rag-tags">'
+                        + "".join(
+                            f'<span class="rag-tag">{concept}</span>'
+                            for concept in key_concepts
+                        )
+                        + "</div>",
+                        unsafe_allow_html=True,
                     )
         threshold = st.slider(
             "Confidence threshold", 0.0, 1.0, settings.confidence_threshold, 0.01
