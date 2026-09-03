@@ -94,7 +94,7 @@ def main() -> None:
                     if service is None:
                         raise RuntimeError("direct service is unavailable")
                     count = ingest_directory(data_dir, service.embedding_provider, service.vector_store)
-                st.toast(f"Indexed {count} chunks", icon="OK")
+                st.toast(f"Indexed {count} chunks", icon="✅")
                 st.rerun()
             except (RuntimeError, ValueError, OSError):
                 st.error(_friendly_error("Document ingestion failed. Check the data directory and service status."))
