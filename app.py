@@ -14,46 +14,83 @@ from core.service import RAGService
 from factory import get_rag_service
 from ingestion import ingest_directory
 
-KNOWLEDGE_BASE_DOCUMENTS = (
+KnowledgeBaseDocument = tuple[str, str, str, str, tuple[str, ...]]
+KNOWLEDGE_BASE_DOCUMENTS: tuple[KnowledgeBaseDocument, ...] = (
     (
         "doc1.txt",
         "Local AI development",
         "Offline inference keeps prompts and documents local, removes network dependency, and supports repeatable development.",
+        "Privacy-preserving local inference and reproducible AI workflows.",
+        ("offline inference", "data privacy", "network independence", "reproducibility"),
     ),
     (
         "doc2.txt",
         "Python environments",
         "Virtual environments isolate project dependencies from the system interpreter.",
+        "Dependency isolation for predictable Python project setup.",
+        ("venv", "dependency isolation", "pip", "reproducible setup"),
     ),
     (
         "doc3.txt",
         "RAG ingestion",
         "RAG ingestion reads documents, creates passages and embeddings, and stores vectors for later search.",
+        "The ingestion path from source documents to searchable vector representations.",
+        ("chunking", "embeddings", "vector search", "document pipeline"),
     ),
     (
         "doc4.txt",
         "SQLite knowledge bases",
         "SQLite stores text and serialized embeddings while Python calculates cosine similarity.",
+        "A lightweight embedded vector store design for small local knowledge bases.",
+        ("SQLite", "BLOB storage", "cosine similarity", "local persistence"),
     ),
     (
         "doc5.txt",
         "Apple Silicon compatibility",
         "ARM64 Python, compatible macOS wheels, and reproducible environments support local model execution.",
+        "Runtime and package choices for reliable local AI on Apple Silicon.",
+        ("ARM64", "macOS wheels", "Foundry Local", "hardware compatibility"),
     ),
     (
         "project_plan.txt",
         "Project delivery plan",
         "A six-week plan covers foundations, implementation, testing, documentation, and the final demo.",
+        "A phased six-week delivery plan for a Local RAG AI Assistant.",
+        ("Foundations", "Build Project", "Testing", "documentation", "demo"),
     ),
 )
 
-SUGGESTED_QUESTIONS = (
-    "Why is local AI development useful for privacy and repeatable development?",
-    "How does a Python virtual environment isolate project dependencies?",
-    "What steps does the RAG ingestion pipeline perform before search?",
-    "How does SQLite support a small local vector knowledge base?",
-    "What setup is recommended for local AI development on Apple Silicon?",
-    "What are the three phases of the local RAG AI assistant project plan?",
+QUESTION_LIBRARY: tuple[tuple[str, tuple[str, ...]], ...] = (
+    (
+        "🏗️ Architecture & Phases",
+        (
+            "How does SQLite store embeddings and support cosine similarity search?",
+            "What are the three phases and week ranges in the project delivery plan?",
+            "How does the RAG assistant separate ingestion, storage, retrieval, and generation?",
+            "Why is SQLite an appropriate vector store for a small local knowledge base?",
+            "What deliverables are planned for the Testing & Wrap-up phase?",
+        ),
+    ),
+    (
+        "⚙️ Data Ingestion & RAG Pipeline",
+        (
+            "Why is local AI useful when prompts and documents must remain private?",
+            "What steps transform source documents into searchable RAG vectors?",
+            "How do chunking and embeddings prepare passages for semantic retrieval?",
+            "What network dependency is removed by running inference locally?",
+            "How does the ingestion pipeline connect source text to later search?",
+        ),
+    ),
+    (
+        "💻 Runtime & Hardware Optimization",
+        (
+            "How does a Python virtual environment isolate project dependencies?",
+            "Why should Apple Silicon users choose ARM64 Python and compatible wheels?",
+            "How does a virtual environment improve reproducibility across machines?",
+            "What package compatibility concerns matter for local AI on macOS?",
+            "How do Python environments and Apple Silicon compatibility work together for local models?",
+        ),
+    ),
 )
 
 MAX_SESSION_QUERIES = 8
@@ -232,9 +269,20 @@ def main() -> None:
             f"Embedding: {cast(str, metadata.get('embedding_model', 'unknown'))}"
         )
         with st.expander("📚 Knowledge Base", expanded=True):
-            for document_name, topic, description in KNOWLEDGE_BASE_DOCUMENTS:
-                st.markdown(f"**{document_name}** · {topic}")
-                st.caption(description)
+            for (
+                document_name,
+                domain,
+                summary,
+                scope,
+                key_concepts,
+            ) in KNOWLEDGE_BASE_DOCUMENTS:
+                with st.expander(document_name):
+                    st.markdown(f"**Domain:** {domain}")
+                    st.markdown(f"**Scope:** {scope}")
+                    st.markdown(f"**Summary:** {summary}")
+                    st.markdown(
+                        "**Key Concepts:** " + ", ".join(key_concepts)
+                    )
         threshold = st.slider(
             "Confidence threshold", 0.0, 1.0, settings.confidence_threshold, 0.01
         )
@@ -267,14 +315,17 @@ def main() -> None:
                     st.caption(f"Latency: {message['latency_seconds']:.3f}s")
 
     st.subheader("💡 Suggested Questions")
-    question_columns = st.columns(2)
-    for index, suggested_question in enumerate(SUGGESTED_QUESTIONS):
-        if question_columns[index % 2].button(
-            suggested_question,
-            key=f"suggested-question-{index}",
-            use_container_width=True,
-        ):
-            st.session_state["pending_prompt"] = suggested_question
+    question_tabs = st.tabs([category for category, _ in QUESTION_LIBRARY])
+    for tab, (_, questions) in zip(question_tabs, QUESTION_LIBRARY):
+        with tab:
+            question_columns = st.columns(2)
+            for index, suggested_question in enumerate(questions):
+                if question_columns[index % 2].button(
+                    suggested_question,
+                    key=f"suggested-question-{index}-{questions[0][:12]}",
+                    use_container_width=True,
+                ):
+                    st.session_state["pending_prompt"] = suggested_question
 
     prompt = st.session_state.pop("pending_prompt", None)
     if prompt is None:
