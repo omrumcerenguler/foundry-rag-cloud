@@ -779,7 +779,7 @@ def main() -> None:
 
                         **Gelecek Çalışması:** Çok kiracılı ve birbirinden izole çalışma alanlarına dosya yükleme, PDF/Docx için sürükle-bırak ayrıştırma ve RBAC kontrollü dinamik indeksleme sonraki sürümlerde planlanmaktadır.
 
-                        ### 🚀 How to Use / Nasıl Kullanılır?
+                        ### 🚀 Nasıl Kullanılır?
                         1. **Adım 1 (Ingest):** Önce sidebar'daki **'Ingest Documents'** düğmesine tıklayın. Ham metin dosyaları işlenir ve vektör embeddings SQLite'a kaydedilir.
                         2. **Adım 2 (Inspect):** Ham kaynak belgeleri incelemek ve içeriklerini doğrulamak için **'Knowledge Base'** expander'ını açın.
                         3. **Adım 3 (Ask & Explore):** Sidebar'daki **'💡 Question Library'** içinden test edilmiş bir soru seçin; başlangıçtaki **'Suggested Questions'** grid'inde bir chip'e tıklayın; ya da alttaki chat input'a kendi sorunuzu yazın.
@@ -808,7 +808,7 @@ def main() -> None:
 
                         **Future Work:** Multi-tenant isolated workspace uploads, drag-and-drop PDF/Docx parsing, and RBAC-controlled dynamic indexing are planned for future releases.
 
-                        ### 🚀 How to Use / Nasıl Kullanılır?
+                        ### 🚀 How to Use?
                         1. **Step 1 (Ingest):** First, click **'Ingest Documents'** in the sidebar. It processes raw text files and stores their vector embeddings in SQLite.
                         2. **Step 2 (Inspect):** Open the **'Knowledge Base'** expander to inspect the raw source documents and verify their contents.
                         3. **Step 3 (Ask & Explore):** Pick a pre-tested question from the **'💡 Question Library'** in the sidebar; click any chip in the initial **'Suggested Questions'** grid; or type your own custom question in the chat input at the bottom.
