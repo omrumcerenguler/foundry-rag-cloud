@@ -326,7 +326,12 @@ def _consume_query_slot() -> bool:
 
 def main() -> None:
     """Render the RAG chat application."""
-    st.set_page_config(page_title="Enterprise Hybrid RAG", page_icon="R", layout="wide")
+    st.set_page_config(
+        page_title="Grounded AI Studio | Azure RAG",
+        page_icon="⚡",
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
     st.markdown(
         """
         <style>
