@@ -28,7 +28,7 @@ An enterprise-grade Grounded Retrieval-Augmented Generation (RAG) assistant for 
 | Providers and API         | Foundry Local and Azure OpenAI adapters; FastAPI with Pydantic v2 contracts, API-key authentication, CORS policy controls, and structured errors.     |
 | Observability and caching | Query latency, similarity confidence, match count, model identity, and in-memory cache HIT/MISS telemetry.                                            |
 | Security and reliability  | Eight-query session quota, four-second cooldown, bounded context, validation, atomic ingestion replacement, and curated ingestion boundaries.         |
-| Quality and DevSecOps     | 69 unit and integration tests, `pytest-cov` with an 85% coverage gate, strict MyPy, Ruff, Flake8, Bandit, `pip-audit`, Docker, and GitHub Actions CI. |
+| Quality and DevSecOps     | 69 unit and integration tests; `pytest-cov` with an 85% coverage gate enforced in GitHub Actions CI; strict MyPy, Ruff, Flake8, Bandit, `pip-audit`, and Docker. |
 
 ### Architecture and Data Flow
 
@@ -63,7 +63,13 @@ The bundled corpus is an internal engineering knowledge base covering Microsoft 
 
 - SQLite keeps the deployment footprint small while providing durable local storage for embeddings and metadata.
 - A custom cosine-similarity engine ranks candidates locally, removing the need for a managed external vector database for this use case.
+- Embeddings are validated for numerical integrity: NaN, Infinity, dimension-mismatched, and zero vectors are rejected before storage or retrieval.
 - The architecture supports Azure OpenAI cloud models and the optional offline Foundry Local provider through stable provider ports.
+
+**Clean architecture and extensibility**
+
+- The RAG service uses constructor-based dependency injection over abstract embedding, chat, and vector-store ports, decoupling core orchestration from runtime implementations.
+- `factory.py` applies the Factory pattern to assemble a complete LOCAL or AZURE_CLOUD service without embedding provider-specific logic in the core workflow.
 
 **Observability and efficiency**
 
@@ -76,8 +82,8 @@ The bundled corpus is an internal engineering knowledge base covering Microsoft 
 - Eight questions per browser session and a four-second request cooldown protect the public demo from accidental burst traffic.
 - Curated, pre-indexed documents create a controlled data boundary that reduces untrusted-content and prompt-injection exposure.
 - Ingestion skips binary, null-byte, unreadable, and unsupported files and replaces the index atomically, preserving the previous usable index on failure.
-- SQLite uses WAL journaling, a 30-second busy timeout, and lock-protected access; equal scores are resolved deterministically.
-- Azure OpenAI requests parse `Retry-After` for 429 responses and retry eligible 429/5xx failures with exponential backoff.
+- SQLite uses WAL journaling and a 30-second busy timeout for concurrent file access. Within one Python process, an `RLock` serializes access; multi-process coordination relies on SQLite file-level locking. Equal scores are resolved deterministically.
+- Azure OpenAI requests parse 429 `Retry-After` headers, cap the delay at 10 seconds, and retry eligible 429/5xx failures with bounded exponential backoff.
 - Container images run as a non-root user. Docker Compose applies read-only service filesystems, restricted `tmpfs` mounts, health-based startup, and CPU/memory limits.
 
 ### Evaluation and Operations
@@ -193,7 +199,7 @@ Microsoft Foundry & Local AI Assistant, Microsoft Foundry ve yerel yapay zeka si
 | Sağlayıcılar ve API            | Foundry Local ve Azure OpenAI adaptörleri; Pydantic v2 sözleşmeleri, API anahtarı doğrulaması, CORS politikaları ve yapılandırılmış hata yanıtlarıyla FastAPI servis sınırı. |
 | Gözlemlenebilirlik ve önbellek | Sorgu gecikmesi, benzerlik güveni, eşleşme sayısı, model bilgisi ve bellek içi Cache HIT/MISS telemetrisi.                                                                   |
 | Güvenlik ve dayanıklılık       | Sekiz sorguluk oturum kotası, dört saniyelik bekleme, sınırlı bağlam, girdi doğrulama, atomik indeks güncellemesi ve kontrollü veri sınırı.                                  |
-| Kalite ve DevSecOps            | 69 birim ve entegrasyon testi, `%85` kod kapsamı eşiğiyle `pytest-cov`, strict MyPy, Ruff, Flake8, Bandit, `pip-audit`, Docker ve GitHub Actions CI.                         |
+| Kalite ve DevSecOps            | 69 birim ve entegrasyon testi; GitHub Actions CI içinde zorlanan `%85` kod kapsamı eşiğiyle `pytest-cov`, strict MyPy, Ruff, Flake8, Bandit, `pip-audit` ve Docker.          |
 
 ### Mimari ve Veri Akışı
 
@@ -228,7 +234,13 @@ Birlikte gelen bilgi tabanı Microsoft Foundry, çevrim dışı çıkarım, Pyth
 
 - SQLite, embedding ve metadata için kalıcı yerel depolama sağlarken kurulum yükünü düşük tutar.
 - Özel cosine similarity motoru adayları yerelde sıralar; bu kullanım senaryosunda yönetilen harici bir vektör veritabanına ihtiyaç duyulmaz.
+- Embedding'ler sayısal bütünlük açısından doğrulanır; NaN, sonsuz, boyutu uyumsuz ve sıfır vektörler depolama veya getirme aşamasına ulaşmadan reddedilir.
 - Sağlayıcı soyutlaması, Azure OpenAI bulut modelleri ile isteğe bağlı Foundry Local çalışma zamanını destekler.
+
+**Temiz mimari ve genişletilebilirlik**
+
+- RAG servisi, soyut embedding, sohbet ve vektör deposu portları üzerinde yapıcı tabanlı bağımlılık enjeksiyonu kullanır; böylece çekirdek orkestrasyon somut çalışma zamanı uygulamalarından ayrılır.
+- `factory.py`, sağlayıcıya özgü mantığı çekirdek iş akışına taşımadan eksiksiz bir LOCAL veya AZURE_CLOUD servisi oluşturmak için Factory desenini uygular.
 
 **Gözlemlenebilirlik ve verimlilik**
 
@@ -241,8 +253,8 @@ Birlikte gelen bilgi tabanı Microsoft Foundry, çevrim dışı çıkarım, Pyth
 - Tarayıcı oturumu başına sekiz sorgu ve dört saniyelik istek bekleme süresi, genel kullanıma açık demoyu ani istek yoğunluğuna karşı korur.
 - Önceden indekslenen düzenlenmiş belgeler, güvenilmeyen içerik ve prompt injection riskini azaltan kontrollü bir veri sınırı oluşturur.
 - İçeri aktarma süreci ikili, null byte içeren, okunamayan ve desteklenmeyen dosyaları atlar; hata durumunda önceki kullanılabilir indeksi koruyacak şekilde atomik güncelleme yapar.
-- SQLite, WAL günlük modu, 30 saniyelik yoğunluk zaman aşımı ve kilitle korunan erişim kullanır; eşit skorlar deterministik biçimde sıralanır.
-- Azure OpenAI istekleri, 429 yanıtlarındaki `Retry-After` başlığını işler; uygun 429 ve 5xx hatalarını üstel geri çekilmeyle yeniden dener.
+- SQLite, eş zamanlı dosya erişimi için WAL günlük modu ve 30 saniyelik yoğunluk zaman aşımı kullanır. Tek Python işlemi içinde `RLock` erişimi serileştirir; çok işlemli eşgüdüm SQLite'ın dosya düzeyindeki kilitlemesine dayanır. Eşit skorlar deterministik biçimde sıralanır.
+- Azure OpenAI istekleri, 429 yanıtlarındaki `Retry-After` başlığını işler, gecikmeyi en fazla 10 saniye ile sınırlar ve uygun 429/5xx hatalarını sınırlı üstel geri çekilmeyle yeniden dener.
 - Container imajları root olmayan kullanıcıyla çalışır. Docker Compose; salt okunur servis dosya sistemleri, kısıtlı `tmpfs` bağlamaları, sağlık kontrolüne bağlı başlatma ve CPU/bellek sınırları uygular.
 
 ### Değerlendirme ve Operasyonlar
