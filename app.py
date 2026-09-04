@@ -408,7 +408,7 @@ def _consume_query_slot() -> bool:
 def main() -> None:
     """Render the RAG chat application."""
     st.set_page_config(
-        page_title="Foundry AI Assistant",
+        page_title="Foundry RAG Cloud",
         page_icon="⚡",
         layout="wide",
         initial_sidebar_state="expanded",
@@ -939,7 +939,7 @@ def main() -> None:
     st.markdown(
         """
         <section class="rag-hero">
-            <h1>Microsoft Foundry &amp; Local AI Assistant</h1>
+            <h1>Foundry RAG Cloud</h1>
             <p>Enterprise Grounded RAG powered by Azure OpenAI, SQLite Vector Retrieval &amp; Production Telemetry</p>
             <div class="rag-badges">
                 <span class="rag-badge">Azure OpenAI · gpt-4.1-mini</span>
