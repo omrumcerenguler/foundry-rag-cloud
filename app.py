@@ -401,7 +401,7 @@ def _consume_query_slot() -> bool:
 def main() -> None:
     """Render the RAG chat application."""
     st.set_page_config(
-        page_title="Microsoft Foundry & Local AI Assistant",
+        page_title="Foundry AI Assistant",
         page_icon="⚡",
         layout="wide",
         initial_sidebar_state="expanded",
