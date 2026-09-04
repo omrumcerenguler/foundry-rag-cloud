@@ -1,6 +1,7 @@
 """Streamlit interface for interactive grounded conversations."""
 
 import html
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -9,6 +10,7 @@ from typing import Any, cast
 
 import httpx
 import streamlit as st
+import streamlit.components.v1 as components
 
 from config import Settings
 from core.models import RAGQueryRequest
@@ -253,11 +255,72 @@ def _conversation_markdown(messages: list[dict[str, object]]) -> str:
 
 def _render_copy_button(answer: str) -> None:
     """Render a browser clipboard action for one assistant response."""
-    encoded_answer = html.escape(json.dumps(answer), quote=True)
-    st.markdown(
-        f'<button class="rag-copy-button" type="button" onclick="navigator.clipboard.writeText({encoded_answer})">Copy answer</button>',
-        unsafe_allow_html=True,
-    )
+    copy_key = f"copy_{hashlib.sha256(answer.encode()).hexdigest()[:10]}"
+    encoded_answer = json.dumps(answer, ensure_ascii=True).replace("</", "<\\/")
+    component_html = f"""
+        <style>
+            html, body {{
+                margin: 0;
+                padding: 0;
+                background: transparent;
+                overflow: hidden;
+            }}
+            .rag-copy-button {{
+                background: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 7px;
+                color: #9baac0;
+                cursor: pointer;
+                font-family: sans-serif;
+                font-size: 0.7rem;
+                padding: 0.25rem 0.55rem;
+                transition: color 160ms ease, border-color 160ms ease;
+            }}
+            .rag-copy-button:hover {{
+                border-color: #67e8f9;
+                color: #f3f7ff;
+            }}
+        </style>
+        <button id="{copy_key}" class="rag-copy-button" type="button">Copy answer</button>
+        <script>
+            const button = document.getElementById({copy_key!r});
+            const answer = {encoded_answer};
+
+            async function copyAnswer() {{
+                try {{
+                    if (!navigator.clipboard || !window.isSecureContext) {{
+                        throw new Error("Clipboard API unavailable");
+                    }}
+                    await navigator.clipboard.writeText(answer);
+                }} catch (error) {{
+                    const fallback = document.createElement("textarea");
+                    fallback.value = answer;
+                    fallback.style.position = "fixed";
+                    fallback.style.opacity = "0";
+                    document.body.appendChild(fallback);
+                    fallback.focus();
+                    fallback.select();
+                    fallback.setSelectionRange(0, fallback.value.length);
+                    const copied = document.execCommand("copy");
+                    fallback.remove();
+                    if (!copied) {{
+                        throw error;
+                    }}
+                }}
+                button.textContent = "✓ Copied!";
+                window.setTimeout(() => {{ button.textContent = "Copy answer"; }}, 1500);
+            }}
+
+            button.addEventListener("click", () => {{
+                copyAnswer().catch(() => {{
+                    button.textContent = "Unable to copy";
+                    window.setTimeout(() => {{ button.textContent = "Copy answer"; }}, 1500);
+                }});
+            }});
+        </script>
+    """
+    with st.container(key=copy_key):
+        components.html(component_html, height=35, scrolling=False)
 
 
 def _render_response_observability(message: dict[str, object]) -> None:
