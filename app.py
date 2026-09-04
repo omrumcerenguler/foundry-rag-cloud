@@ -549,6 +549,18 @@ def main() -> None:
             font-size: 1rem;
             margin-bottom: 0.25rem;
         }
+        .rag-onboarding {
+            background: linear-gradient(135deg, rgba(103, 232, 249, 0.1), rgba(129, 140, 248, 0.1));
+            border: 1px solid rgba(103, 232, 249, 0.3);
+            border-radius: 9px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 10px 28px rgba(0, 0, 0, 0.12);
+            color: #dceeff;
+            margin: 0.1rem 0 1.2rem;
+            padding: 0.85rem 1rem;
+        }
+        .rag-onboarding strong {
+            color: var(--rag-cyan);
+        }
         @media (max-width: 640px) {
             .rag-hero h1 {
                 font-size: 2rem;
@@ -701,6 +713,16 @@ def main() -> None:
                 )
             if message.get("observability"):
                 _render_response_observability(message)
+
+    if cast(int, metadata.get("total_chunk_count", 0)) == 0:
+        st.markdown(
+            """
+            <div class="rag-onboarding">
+                💡 <strong>Quick Setup:</strong> If you are visiting for the first time or vector chunks show 0, please click <strong>'Ingest Documents'</strong> in the sidebar. This parses the knowledge base files and loads their vector embeddings into SQLite so the assistant can retrieve answers.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     st.subheader("💡 Suggested Questions")
     question_tabs = st.tabs([category for category, _ in QUESTION_LIBRARY])
