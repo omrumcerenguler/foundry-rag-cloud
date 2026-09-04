@@ -1,7 +1,7 @@
 """Streamlit interface for interactive grounded conversations."""
 
-import html
 import hashlib
+import html
 import json
 import os
 from pathlib import Path
@@ -25,7 +25,12 @@ KNOWLEDGE_BASE_DOCUMENTS: tuple[KnowledgeBaseDocument, ...] = (
         "Local AI development",
         "Offline inference keeps prompts and documents local, removes network dependency, and supports repeatable development.",
         "Privacy-preserving local inference and reproducible AI workflows.",
-        ("offline inference", "data privacy", "network independence", "reproducibility"),
+        (
+            "offline inference",
+            "data privacy",
+            "network independence",
+            "reproducibility",
+        ),
     ),
     (
         "doc2.txt",
@@ -343,12 +348,12 @@ def _render_response_observability(message: dict[str, object]) -> None:
     model = str(telemetry.get("model", "unknown"))
     cache = str(telemetry.get("cache", "MISS"))
     st.markdown(
-        "<div class=\"rag-observability\">"
+        '<div class="rag-observability">'
         f"<span>Latency {latency_ms:.0f} ms</span>"
         f"<span>Confidence {confidence:.3f}</span>"
         f"<span>{match_count} match{'es' if match_count != 1 else ''}</span>"
         f"<span>{html.escape(model)}</span>"
-        f"<span class=\"rag-cache-{cache.lower()}\">Cache {html.escape(cache)}</span>"
+        f'<span class="rag-cache-{cache.lower()}">Cache {html.escape(cache)}</span>'
         "</div>",
         unsafe_allow_html=True,
     )
@@ -391,7 +396,9 @@ def _consume_query_slot() -> bool:
     elapsed = now - last_query_at
     if last_query_at and elapsed < QUERY_COOLDOWN_SECONDS:
         remaining = QUERY_COOLDOWN_SECONDS - elapsed
-        st.warning(f"Please wait {remaining:.1f} seconds before asking another question.")
+        st.warning(
+            f"Please wait {remaining:.1f} seconds before asking another question."
+        )
         return False
     st.session_state["query_count"] = query_count + 1
     st.session_state["last_query_at"] = now
@@ -742,10 +749,18 @@ def main() -> None:
                 "http://127.0.0.1:8000."
             )
         else:
-            st.error(_friendly_error("RAG service is unavailable. Check the backend configuration."))
+            st.error(
+                _friendly_error(
+                    "RAG service is unavailable. Check the backend configuration."
+                )
+            )
         return
     except Exception:
-        st.error(_friendly_error("RAG service is unavailable. Check the backend configuration."))
+        st.error(
+            _friendly_error(
+                "RAG service is unavailable. Check the backend configuration."
+            )
+        )
         return
     with st.sidebar:
         st.title("Foundry AI Ops & Architecture")
@@ -774,9 +789,7 @@ def main() -> None:
             use_container_width=True,
         )
         st.metric("Indexed chunks", cast(int, metadata.get("total_chunk_count", 0)))
-        quota_used = min(
-            int(st.session_state["query_count"]), MAX_SESSION_QUERIES
-        )
+        quota_used = min(int(st.session_state["query_count"]), MAX_SESSION_QUERIES)
         quota_remaining = MAX_SESSION_QUERIES - quota_used
         st.metric(
             "Session Quota",
@@ -819,7 +832,9 @@ def main() -> None:
                         unsafe_allow_html=True,
                     )
         with st.expander("💡 Question Library / Catalog", expanded=False):
-            st.caption("Browse categorized questions about Foundry and local AI systems engineering.")
+            st.caption(
+                "Browse categorized questions about Foundry and local AI systems engineering."
+            )
             with st.container(key="question-catalog"):
                 for category, questions in QUESTION_LIBRARY:
                     st.markdown(f"**{category}**")
@@ -910,16 +925,22 @@ def main() -> None:
                 else:
                     if service is None:
                         raise RuntimeError("direct service is unavailable")
-                    count = ingest_directory(data_dir, service.embedding_provider, service.vector_store)
+                    count = ingest_directory(
+                        data_dir, service.embedding_provider, service.vector_store
+                    )
                 st.toast(f"Indexed {count} chunks", icon="✅")
                 st.rerun()
             except (RuntimeError, ValueError, OSError):
-                st.error(_friendly_error("Document ingestion failed. Check the data directory and service status."))
+                st.error(
+                    _friendly_error(
+                        "Document ingestion failed. Check the data directory and service status."
+                    )
+                )
     st.markdown(
         """
         <section class="rag-hero">
             <h1>Microsoft Foundry &amp; Local AI Assistant</h1>
-            <p>Enterprise Grounded RAG for Local AI Architecture, SQLite Vector Retrieval &amp; Hardware Optimization</p>
+            <p>Enterprise Grounded RAG powered by Azure OpenAI, SQLite Vector Retrieval &amp; Production Telemetry</p>
             <div class="rag-badges">
                 <span class="rag-badge">Azure OpenAI · gpt-4.1-mini</span>
                 <span class="rag-badge">SQLite Vector</span>
@@ -1012,12 +1033,18 @@ def main() -> None:
             elif error_message == "backend request timed out":
                 message = "The backend took too long to respond. Please retry."
             elif error_message == "backend connection failed":
-                message = "The backend connection was lost. Check service status and retry."
+                message = (
+                    "The backend connection was lost. Check service status and retry."
+                )
             else:
                 message = "Query failed. The service may be unavailable or the index may be empty."
             st.error(_friendly_error(message))
         except Exception:
-            st.error(_friendly_error("Query failed. The service may be unavailable or the index may be empty."))
+            st.error(
+                _friendly_error(
+                    "Query failed. The service may be unavailable or the index may be empty."
+                )
+            )
         else:
             st.rerun()
 
