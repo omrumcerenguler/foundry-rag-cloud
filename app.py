@@ -707,7 +707,7 @@ def main() -> None:
         st.caption(
             f"Embedding: {cast(str, metadata.get('embedding_model', 'unknown'))}"
         )
-        with st.expander("📚 Knowledge Base", expanded=True):
+        with st.expander("📚 Knowledge Base", expanded=False):
             for (
                 document_name,
                 domain,
