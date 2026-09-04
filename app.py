@@ -67,6 +67,34 @@ KNOWLEDGE_BASE_DOCUMENTS: tuple[KnowledgeBaseDocument, ...] = (
         "A phased six-week delivery plan for a Local RAG AI Assistant.",
         ("Foundations", "Build Project", "Testing", "documentation", "demo"),
     ),
+    (
+        "azure_openai_rate_limits.md",
+        "Azure OpenAI rate limits",
+        "TPM/RPM quotas, 429 handling, Retry-After parsing, and bounded exponential backoff for Azure OpenAI requests.",
+        "Cloud API resilience and retry strategy for production RAG deployments.",
+        ("TPM/RPM quotas", "429 handling", "Retry-After", "exponential backoff"),
+    ),
+    (
+        "rag_architecture_and_chunking.md",
+        "RAG architecture & chunking",
+        "Embedding model selection, cosine similarity ranking, chunk overlap strategy, and citation-backed grounding validation.",
+        "Design principles behind retrieval quality and deterministic grounding.",
+        ("cosine similarity", "chunk overlap", "context budget", "citation validation"),
+    ),
+    (
+        "sqlite_vector_storage_lifecycle.md",
+        "SQLite vector storage lifecycle",
+        "WAL journaling, busy timeout handling, vector serialization safeguards, and atomic index replacement.",
+        "Concurrency-safe, defensive data integrity for the embedded vector store.",
+        ("WAL mode", "atomic rollback", "vector validation", "busy timeout"),
+    ),
+    (
+        "observability_and_telemetry.md",
+        "Observability & telemetry",
+        "Latency percentiles, cache HIT/MISS tracking, confidence reporting, and ingestion audit logging for production RAG systems.",
+        "Production monitoring standards for grounded retrieval applications.",
+        ("p50/p95/p99 latency", "cache HIT/MISS", "confidence scoring", "audit logging"),
+    ),
 )
 
 QUESTION_LIBRARY: tuple[tuple[str, tuple[str, ...]], ...] = (
@@ -109,6 +137,15 @@ QUESTION_LIBRARY: tuple[tuple[str, tuple[str, ...]], ...] = (
             "What are the three phases and week ranges in the project delivery plan?",
             "What deliverables are planned for the Testing & Wrap-up phase?",
             "What does the six-week project delivery plan cover?",
+        ),
+    ),
+    (
+        "📡 Cloud Resilience & Observability",
+        (
+            "How does Azure OpenAI signal a 429 rate limit, and how does the Retry-After header guide backoff timing?",
+            "Why do SQLite's WAL mode and atomic rollback protect the vector index during an ingestion failure?",
+            "How does cosine similarity over text-embedding-3-small vectors rank retrieved passages?",
+            "What do p50, p95, and p99 latency percentiles reveal that a single average latency cannot?",
         ),
     ),
 )

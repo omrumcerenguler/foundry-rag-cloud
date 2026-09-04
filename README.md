@@ -51,7 +51,7 @@ User query
   -> Citation-backed answer: docX.txt, chunk Y + telemetry
 ```
 
-The bundled corpus is an internal engineering knowledge base covering Microsoft Foundry, offline inference, Python environments, RAG ingestion, SQLite vector retrieval, Apple Silicon compatibility, and a local RAG delivery plan.
+The bundled corpus is an internal engineering knowledge base covering Microsoft Foundry, offline inference, Python environments, RAG ingestion and chunking strategy, SQLite vector retrieval and concurrency, Azure OpenAI rate-limit resilience, production observability, Apple Silicon compatibility, and a local RAG delivery plan.
 
 ### Key Engineering Capabilities
 
@@ -96,7 +96,7 @@ The bundled corpus is an internal engineering knowledge base covering Microsoft 
 
 ### Focused User Experience
 
-- The dark Streamlit interface includes a five-category engineering question library, bilingual sidebar guidebook, conversation download, and source inspection.
+- The dark Streamlit interface includes a six-category engineering question library, bilingual sidebar guidebook, conversation download, and source inspection.
 - The onboarding banner and suggested questions disappear after the first interaction so the conversation becomes the primary workspace.
 - The copy action runs in a client-side JavaScript component without a Streamlit rerun, uses Clipboard API and `execCommand` fallback paths, and reports `Copied!` feedback.
 
@@ -224,7 +224,7 @@ Kullanıcı sorgusu
   -> Kaynaklı yanıt: docX.txt, chunk Y + telemetri
 ```
 
-Birlikte gelen bilgi tabanı Microsoft Foundry, çevrim dışı çıkarım, Python ortamları, RAG içerik alma, SQLite vektör getirme, Apple Silicon uyumluluğu ve yerel RAG teslim planı konularını kapsar.
+Birlikte gelen bilgi tabanı Microsoft Foundry, çevrim dışı çıkarım, Python ortamları, RAG içerik alma ve parçalama stratejisi, SQLite vektör getirme ve eşzamanlılık, Azure OpenAI rate-limit dayanıklılığı, üretim gözlemlenebilirliği, Apple Silicon uyumluluğu ve yerel RAG teslim planı konularını kapsar.
 
 ### Temel Mühendislik Yetenekleri
 
@@ -269,7 +269,7 @@ Birlikte gelen bilgi tabanı Microsoft Foundry, çevrim dışı çıkarım, Pyth
 
 ### Odaklı Kullanıcı Deneyimi
 
-- Koyu temalı Streamlit arayüzü; beş kategorili mühendislik soru kütüphanesi, iki dilli yan panel rehberi, sohbet indirme ve kaynak inceleme işlevleri içerir.
+- Koyu temalı Streamlit arayüzü; altı kategorili mühendislik soru kütüphanesi, iki dilli yan panel rehberi, sohbet indirme ve kaynak inceleme işlevleri içerir.
 - İlk etkileşimden sonra karşılama alanı ve önerilen sorular gizlenir; böylece sohbet çalışma alanı ön plana çıkar.
 - Kopyalama işlemi Streamlit yeniden çalıştırması oluşturmadan tarayıcı tarafındaki JavaScript bileşeninde yürür; Clipboard API ve `execCommand` geri dönüşünü kullanır, `Copied!` bildirimi gösterir.
 
