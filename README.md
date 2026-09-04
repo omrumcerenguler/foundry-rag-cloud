@@ -18,16 +18,16 @@ An enterprise-grade Grounded Retrieval-Augmented Generation (RAG) assistant for 
 
 ### Technology Stack
 
-| Area                      | Implementation                                                                                                                                |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Language and runtime      | Python 3.10+; Python 3.13 is the tested local, CI, and container path.                                                                        |
-| Frontend and UX           | Streamlit with a dark glassmorphism layout, focused conversation flow, and a native JavaScript clipboard bridge.                              |
-| Vector engine and storage | SQLite persistent storage, JSON-serialized vector embeddings, provenance metadata, and local cosine-similarity ranking.                       |
-| Cloud AI and models       | Azure OpenAI `text-embedding-3-small` for 1536-dimensional embeddings and `gpt-4.1-mini` for grounded answer generation.                      |
-| HTTP and configuration    | `httpx` API client, `python-dotenv` environment loading, and a Streamlit Secrets bridge for hosted deployments.                                |
-| Providers and API         | Foundry Local and Azure OpenAI adapters; FastAPI with Pydantic v2 contracts, API-key authentication, CORS policy controls, and structured errors. |
-| Observability and caching | Query latency, similarity confidence, match count, model identity, and in-memory cache HIT/MISS telemetry.                                    |
-| Security and reliability  | Eight-query session quota, four-second cooldown, bounded context, validation, atomic ingestion replacement, and curated ingestion boundaries. |
+| Area                      | Implementation                                                                                                                                        |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Language and runtime      | Python 3.10+; Python 3.13 is the tested local, CI, and container path.                                                                                |
+| Frontend and UX           | Streamlit with a dark glassmorphism layout, focused conversation flow, and a native JavaScript clipboard bridge.                                      |
+| Vector engine and storage | SQLite persistent storage, JSON-serialized vector embeddings, provenance metadata, and local cosine-similarity ranking.                               |
+| Cloud AI and models       | Azure OpenAI `text-embedding-3-small` for 1536-dimensional embeddings and `gpt-4.1-mini` for grounded answer generation.                              |
+| HTTP and configuration    | `httpx` API client, `python-dotenv` environment loading, and a Streamlit Secrets bridge for hosted deployments.                                       |
+| Providers and API         | Foundry Local and Azure OpenAI adapters; FastAPI with Pydantic v2 contracts, API-key authentication, CORS policy controls, and structured errors.     |
+| Observability and caching | Query latency, similarity confidence, match count, model identity, and in-memory cache HIT/MISS telemetry.                                            |
+| Security and reliability  | Eight-query session quota, four-second cooldown, bounded context, validation, atomic ingestion replacement, and curated ingestion boundaries.         |
 | Quality and DevSecOps     | 69 unit and integration tests, `pytest-cov` with an 85% coverage gate, strict MyPy, Ruff, Flake8, Bandit, `pip-audit`, Docker, and GitHub Actions CI. |
 
 ### Architecture and Data Flow
@@ -86,11 +86,33 @@ The bundled corpus is an internal engineering knowledge base covering Microsoft 
 - `main.py` provides a unified CLI for ingestion, single-query retrieval, interactive chat, index health checks, and evaluation runs.
 - `healthcheck.py` supplies the container readiness probe, while `export_openapi.py` generates the OpenAPI contract artifact.
 
-**Focused user experience**
+### Focused User Experience
 
 - The dark Streamlit interface includes a five-category engineering question library, bilingual sidebar guidebook, conversation download, and source inspection.
 - The onboarding banner and suggested questions disappear after the first interaction so the conversation becomes the primary workspace.
 - The copy action runs in a client-side JavaScript component without a Streamlit rerun, uses Clipboard API and `execCommand` fallback paths, and reports `Copied!` feedback.
+
+### Repository Structure
+
+```text
+.
+├── core/                    # Domain models, provider/store ports, chunking, grounded RAG service
+├── providers/               # Azure OpenAI HTTP adapter and optional Foundry Local adapter
+├── stores/                  # SQLite vector persistence, provenance metadata, cosine-similarity engine
+├── tests/                   # 69 unit, integration, and hardening test cases across nine suites
+├── api.py                   # FastAPI contract, authentication, CORS, and lifecycle management
+├── app.py                   # Streamlit chat experience, telemetry, caching, and clipboard component
+├── config.py                # Validated environment settings and Streamlit Secrets bridge
+├── factory.py               # Provider, vector store, and RAG service assembly
+├── ingestion.py             # Recursive corpus validation, chunking, embedding, and atomic replacement
+├── main.py                  # Unified CLI for ingest, query, chat, health, and evaluation
+├── evaluate.py              # Retrieval and citation-quality evaluation engine
+├── healthcheck.py           # Container readiness probe
+├── export_openapi.py        # OpenAPI specification exporter
+├── Dockerfile               # Production API container image
+├── Dockerfile.streamlit     # Standalone Streamlit container image
+└── docker-compose.yml       # API/UI deployment, storage, health, and resource policies
+```
 
 ### Quickstart
 
@@ -139,6 +161,20 @@ ruff check .
 
 The suite contains 69 passing tests across API behavior, Azure provider handling, chunking, CLI commands, evaluation, security hardening, ingestion, grounded generation, and SQLite storage.
 
+### Test Suite Matrix
+
+| Suite | Explicit verification |
+| --- | --- |
+| `test_api.py` | Health/readiness states, grounded query payloads, structured 422 errors, API-key enforcement, 429 mapping, atomic ingest summaries, and degraded index health. |
+| `test_azure_provider.py` | Endpoint normalization, `Retry-After` handling, 429 exhaustion, and bounded 5xx retries. |
+| `test_chunker.py` | Deterministic chunk boundaries and metadata plus empty, binary, and invalid-text handling. |
+| `test_cli.py` | CLI flag aliases and user-friendly interactive-chat interruption handling. |
+| `test_evaluate.py` | Structured evaluation behavior when a provider mode is unavailable. |
+| `test_hardening.py` | Streamlit Secrets, malformed input rejection, safe citation fallback, NaN/Inf/zero-vector rejection, corrupted SQLite data, provider failure sanitization, and evaluation edge cases. |
+| `test_ingestion.py` | Null-byte/binary skipping, recursive relative provenance, and preservation of the existing index after provider or vector-dimension failure. |
+| `test_service.py` | Grounded generation, confidence fallback, empty-query rejection, uncited-answer fallback, and context-budget enforcement. |
+| `test_store.py` | Cosine ranking, atomic rollback, zero-norm and dimension validation, WAL/busy-timeout configuration, deterministic tie-breaking, metadata health, and missing provenance handling. |
+
 ---
 
 ## 🇹🇷 Türkçe Dokümantasyon
@@ -147,17 +183,17 @@ Microsoft Foundry & Local AI Assistant, Microsoft Foundry ve yerel yapay zeka si
 
 ### Teknoloji Altyapısı
 
-| Alan                           | Uygulama                                                                                                                                    |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dil ve çalışma ortamı          | Python 3.10+; yerel geliştirme, CI ve container ortamında doğrulanan sürüm Python 3.13'tür.                                                 |
-| Arayüz ve kullanıcı deneyimi   | Koyu cam efektli Streamlit arayüzü, sohbet odaklı akış ve tarayıcı tarafında çalışan JavaScript pano kopyalama köprüsü.                     |
-| Vektör motoru ve depolama      | Kalıcı SQLite depolama, JSON olarak serileştirilmiş vektör embedding'leri, provenance metadatası ve yerel cosine similarity sıralaması.     |
-| Bulut yapay zekası ve modeller | 1536 boyutlu embedding'ler için Azure OpenAI `text-embedding-3-small`; kaynaklı yanıt üretimi için `gpt-4.1-mini`.                          |
-| HTTP ve yapılandırma           | `httpx` API istemcisi, `python-dotenv` ile ortam değişkeni yükleme ve barındırılan kurulumlar için Streamlit Secrets köprüsü.               |
+| Alan                           | Uygulama                                                                                                                                                                     |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dil ve çalışma ortamı          | Python 3.10+; yerel geliştirme, CI ve container ortamında doğrulanan sürüm Python 3.13'tür.                                                                                  |
+| Arayüz ve kullanıcı deneyimi   | Koyu cam efektli Streamlit arayüzü, sohbet odaklı akış ve tarayıcı tarafında çalışan JavaScript pano kopyalama köprüsü.                                                      |
+| Vektör motoru ve depolama      | Kalıcı SQLite depolama, JSON olarak serileştirilmiş vektör embedding'leri, provenance metadatası ve yerel cosine similarity sıralaması.                                      |
+| Bulut yapay zekası ve modeller | 1536 boyutlu embedding'ler için Azure OpenAI `text-embedding-3-small`; kaynaklı yanıt üretimi için `gpt-4.1-mini`.                                                           |
+| HTTP ve yapılandırma           | `httpx` API istemcisi, `python-dotenv` ile ortam değişkeni yükleme ve barındırılan kurulumlar için Streamlit Secrets köprüsü.                                                |
 | Sağlayıcılar ve API            | Foundry Local ve Azure OpenAI adaptörleri; Pydantic v2 sözleşmeleri, API anahtarı doğrulaması, CORS politikaları ve yapılandırılmış hata yanıtlarıyla FastAPI servis sınırı. |
-| Gözlemlenebilirlik ve önbellek | Sorgu gecikmesi, benzerlik güveni, eşleşme sayısı, model bilgisi ve bellek içi Cache HIT/MISS telemetrisi.                                  |
-| Güvenlik ve dayanıklılık       | Sekiz sorguluk oturum kotası, dört saniyelik bekleme, sınırlı bağlam, girdi doğrulama, atomik indeks güncellemesi ve kontrollü veri sınırı. |
-| Kalite ve DevSecOps            | 69 birim ve entegrasyon testi, `%85` kod kapsamı eşiğiyle `pytest-cov`, strict MyPy, Ruff, Flake8, Bandit, `pip-audit`, Docker ve GitHub Actions CI. |
+| Gözlemlenebilirlik ve önbellek | Sorgu gecikmesi, benzerlik güveni, eşleşme sayısı, model bilgisi ve bellek içi Cache HIT/MISS telemetrisi.                                                                   |
+| Güvenlik ve dayanıklılık       | Sekiz sorguluk oturum kotası, dört saniyelik bekleme, sınırlı bağlam, girdi doğrulama, atomik indeks güncellemesi ve kontrollü veri sınırı.                                  |
+| Kalite ve DevSecOps            | 69 birim ve entegrasyon testi, `%85` kod kapsamı eşiğiyle `pytest-cov`, strict MyPy, Ruff, Flake8, Bandit, `pip-audit`, Docker ve GitHub Actions CI.                         |
 
 ### Mimari ve Veri Akışı
 
@@ -215,11 +251,33 @@ Birlikte gelen bilgi tabanı Microsoft Foundry, çevrim dışı çıkarım, Pyth
 - `main.py`, içeri aktarma, tekil sorgu, etkileşimli sohbet, indeks sağlık kontrolü ve değerlendirme çalıştırmaları için birleşik bir CLI sunar.
 - `healthcheck.py` container hazır olma denetimini sağlar; `export_openapi.py` ise OpenAPI sözleşmesi çıktısını üretir.
 
-**Odaklı kullanıcı deneyimi**
+### Odaklı Kullanıcı Deneyimi
 
 - Koyu temalı Streamlit arayüzü; beş kategorili mühendislik soru kütüphanesi, iki dilli yan panel rehberi, sohbet indirme ve kaynak inceleme işlevleri içerir.
 - İlk etkileşimden sonra karşılama alanı ve önerilen sorular gizlenir; böylece sohbet çalışma alanı ön plana çıkar.
 - Kopyalama işlemi Streamlit yeniden çalıştırması oluşturmadan tarayıcı tarafındaki JavaScript bileşeninde yürür; Clipboard API ve `execCommand` geri dönüşünü kullanır, `Copied!` bildirimi gösterir.
+
+### Dizin Yapısı
+
+```text
+.
+├── core/                    # Alan modelleri, sağlayıcı/depo portları, parçalama ve kaynaklı RAG servisi
+├── providers/               # Azure OpenAI HTTP adaptörü ve isteğe bağlı Foundry Local adaptörü
+├── stores/                  # SQLite vektör kalıcılığı, provenance metadatası ve cosine similarity motoru
+├── tests/                   # Dokuz pakete dağıtılmış 69 birim, entegrasyon ve sertleştirme testi
+├── api.py                   # FastAPI sözleşmesi, kimlik doğrulama, CORS ve yaşam döngüsü yönetimi
+├── app.py                   # Streamlit sohbet arayüzü, telemetri, önbellek ve pano kopyalama bileşeni
+├── config.py                # Doğrulanmış ortam ayarları ve Streamlit Secrets köprüsü
+├── factory.py               # Sağlayıcı, vektör deposu ve RAG servisi oluşturma katmanı
+├── ingestion.py             # Özyinelemeli corpus doğrulama, parçalama, embedding ve atomik güncelleme
+├── main.py                  # İçeri aktarma, sorgu, sohbet, sağlık ve değerlendirme için birleşik CLI
+├── evaluate.py              # Getirme ve kaynak kalitesi değerlendirme motoru
+├── healthcheck.py           # Container hazır olma denetimi
+├── export_openapi.py        # OpenAPI sözleşmesi dışa aktarıcısı
+├── Dockerfile               # Üretim API container imajı
+├── Dockerfile.streamlit     # Bağımsız Streamlit container imajı
+└── docker-compose.yml       # API/UI dağıtımı, depolama, sağlık ve kaynak politikaları
+```
 
 ### Hızlı Başlangıç
 
@@ -267,3 +325,17 @@ ruff check .
 ```
 
 69 test; API davranışı, Azure sağlayıcı işlemleri, parçalayıcı, CLI komutları, değerlendirme, güvenlik sertleştirmesi, içerik alma, kaynaklı yanıt üretimi ve SQLite depolama katmanını kapsar.
+
+### Test Paketi Matrisi
+
+| Paket | Açıkça doğrulanan davranışlar |
+| --- | --- |
+| `test_api.py` | Sağlık/hazır olma durumları, kaynaklı sorgu yanıtları, yapılandırılmış 422 hataları, API anahtarı denetimi, 429 eşlemesi, atomik içeri aktarma özeti ve bozulmuş indeks sağlığı. |
+| `test_azure_provider.py` | Uç nokta normalizasyonu, `Retry-After` işleme, 429 sınırının tükenmesi ve sınırlı 5xx yeniden denemeleri. |
+| `test_chunker.py` | Deterministik parça sınırları ve metadata ile boş, ikili ve geçersiz metin işleme davranışı. |
+| `test_cli.py` | CLI bayrak kısaltmaları ve etkileşimli sohbet kesintilerinin kullanıcı dostu yönetimi. |
+| `test_evaluate.py` | Sağlayıcı modu kullanılamadığında yapılandırılmış değerlendirme davranışı. |
+| `test_hardening.py` | Streamlit Secrets, hatalı girdi reddi, güvenli kaynak fallback'i, NaN/Inf/sıfır vektör reddi, bozuk SQLite verisi, sağlayıcı hata sterilizasyonu ve değerlendirme sınır durumları. |
+| `test_ingestion.py` | Null byte/ikili dosya atlama, özyinelemeli göreli provenance ve sağlayıcı ya da vektör boyutu hatasında mevcut indeksin korunması. |
+| `test_service.py` | Kaynaklı yanıt üretimi, güven eşiği fallback'i, boş sorgu reddi, kaynaksız yanıt fallback'i ve bağlam bütçesi uygulaması. |
+| `test_store.py` | Cosine sıralama, atomik geri alma, sıfır norm ve boyut doğrulaması, WAL/yoğunluk zaman aşımı ayarları, deterministik eşitlik çözümü, metadata sağlığı ve eksik provenance işleme. |
