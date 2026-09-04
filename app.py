@@ -401,7 +401,7 @@ def _consume_query_slot() -> bool:
 def main() -> None:
     """Render the RAG chat application."""
     st.set_page_config(
-        page_title="Grounded AI Studio | Azure RAG",
+        page_title="Microsoft Foundry & Local AI Assistant",
         page_icon="⚡",
         layout="wide",
         initial_sidebar_state="expanded",
@@ -735,7 +735,7 @@ def main() -> None:
         st.error(_friendly_error("RAG service is unavailable. Check the backend configuration."))
         return
     with st.sidebar:
-        st.title("RAG Control")
+        st.title("Foundry AI Ops & Architecture")
         mode = "API"
         if service is not None:
             mode = service.mode
@@ -768,7 +768,7 @@ def main() -> None:
         st.metric(
             "Session Quota",
             f"{quota_remaining} / {MAX_SESSION_QUERIES} Remaining",
-            help="This per-session allowance protects the public demo's Azure credits while keeping the demo available for genuine visitors.",
+            help="This per-session allowance protects the Microsoft Foundry engineering demo's Azure credits while keeping it available for genuine visitors.",
         )
         st.progress(
             quota_used / MAX_SESSION_QUERIES,
@@ -783,7 +783,7 @@ def main() -> None:
         st.caption(
             f"Embedding: {cast(str, metadata.get('embedding_model', 'unknown'))}"
         )
-        with st.expander("📚 Knowledge Base", expanded=False):
+        with st.expander("📚 Engineering Knowledge Base", expanded=False):
             for (
                 document_name,
                 domain,
@@ -806,7 +806,7 @@ def main() -> None:
                         unsafe_allow_html=True,
                     )
         with st.expander("💡 Question Library / Catalog", expanded=False):
-            st.caption("Browse categorized questions to explore the knowledge base.")
+            st.caption("Browse categorized questions about Foundry and local AI systems engineering.")
             with st.container(key="question-catalog"):
                 for category, questions in QUESTION_LIBRARY:
                     st.markdown(f"**{category}**")
@@ -817,7 +817,7 @@ def main() -> None:
                             use_container_width=True,
                         ):
                             st.session_state["pending_prompt"] = question
-        with st.expander("📖 Guidebook & Architecture / Rehber", expanded=False):
+        with st.expander("📖 Foundry Engineering Guide / Rehber", expanded=False):
             guide_language = st.radio(
                 "Guide language",
                 ("🇹🇷 Türkçe", "🇬🇧 English"),
@@ -829,22 +829,22 @@ def main() -> None:
                 if guide_language == "🇹🇷 Türkçe":
                     st.markdown(
                         """
-                        ### Proje Nedir?
-                        Grounded RAG'ı bir **açık kitap sınavı** gibi düşünebilirsiniz. Yapay zeka cevabı hafızasından tahmin etmek veya bilgi uydurmak yerine önce güvenilir, doğrulanmış belgeleri okur. Bu uygulama belgeleri SQLite vektör deposunda saklar; Azure OpenAI embeddings (`text-embedding-3-small`) metni matematiksel vektörlere çevirerek doğru pasajları bulur, `gpt-4.1-mini` ise son cevabı anlaşılır biçimde hazırlar.
+                        ### Bu Engineering Knowledge Base Nedir?
+                        Bu Microsoft Foundry ve local AI systems engineering bilgi tabanı; offline inference, RAG ingestion, SQLite vector retrieval, Apple Silicon uyumluluğu ve tekrarlanabilir Python teslimi için doğrulanmış teknik belgeleri bir araya getirir. Asistan yanıt üretmeden önce bu belgeleri okur; Azure OpenAI embeddings (`text-embedding-3-small`) ilgili pasajları bulur, `gpt-4.1-mini` ise kaynak gösteren yanıtı hazırlar.
 
-                        ### Neden Dosya Yükleme Yerine Hazır Dökümanlar Var?
-                        Üretim ortamında RAG sistemleri, düzenlenmiş ve uyumluluk kontrollerinden geçmiş bilgi tabanlarıyla çalışır. Bu yaklaşım bilgi kirliliğini, beklenmedik token maliyet artışlarını ve kötü niyetli prompt injection saldırılarını azaltır.
+                        ### Neden Hazır Bir Engineering Corpus Kullanılıyor?
+                        Üretim RAG sistemlerinde Foundry mimarisi, local deployment ve retrieval tasarımı gibi teknik konular; düzenlenmiş, sürümlenmiş ve doğrulanmış bir engineering knowledge base üzerinden sorgulanır. Bu yaklaşım bilgi kirliliğini, beklenmedik token maliyet artışlarını ve kötü niyetli prompt injection saldırılarını azaltır.
 
                         **Gelecek Çalışması:** Çok kiracılı ve birbirinden izole çalışma alanlarına dosya yükleme, PDF/Docx için sürükle-bırak ayrıştırma ve RBAC kontrollü dinamik indeksleme sonraki sürümlerde planlanmaktadır.
 
                         ### 🚀 Nasıl Kullanılır?
                         1. **Adım 1 (Ingest):** Önce sidebar'daki **'Ingest Documents'** düğmesine tıklayın. Ham metin dosyaları işlenir ve vektör embeddings SQLite'a kaydedilir.
-                        2. **Adım 2 (Inspect):** Ham kaynak belgeleri incelemek ve içeriklerini doğrulamak için **'Knowledge Base'** expander'ını açın.
+                        2. **Adım 2 (Inspect):** Foundry ve local AI kaynaklarını incelemek için **'Engineering Knowledge Base'** expander'ını açın.
                         3. **Adım 3 (Ask & Explore):** Sidebar'daki **'💡 Question Library'** içinden test edilmiş bir soru seçin; başlangıçtaki **'Suggested Questions'** grid'inde bir chip'e tıklayın; ya da alttaki chat input'a kendi sorunuzu yazın.
                         4. **Adım 4 (Analyze):** Oluşan yanıtı inceleyin, **Source Citations** dökümünü doğrulayın ve latency/confidence telemetry değerlerini kontrol edin.
 
                         ### Dil Desteği
-                        Bilgi tabanındaki ham belgeler İngilizcedir. En yüksek retrieval doğruluğu ve deterministik source citation eşleşmesi için İngilizce, birincil ve önerilen dildir. Türkçe sorular `gpt-4.1-mini` tarafından desteklenir; ancak embeddings ve bilgi tabanı metinleri İngilizce olduğu için diller arası retrieval confidence değişebilir. En iyi citation eşleşmesini garanti etmek için İngilizce sormanız önerilir.
+                        Internal engineering knowledge base içindeki teknik kaynaklar İngilizcedir. En yüksek retrieval doğruluğu ve deterministik source citation eşleşmesi için İngilizce, birincil ve önerilen dildir. Türkçe sorular `gpt-4.1-mini` tarafından desteklenir; ancak embeddings ve teknik kaynak metinleri İngilizce olduğu için diller arası retrieval confidence değişebilir. En iyi citation eşleşmesi için İngilizce sormanız önerilir.
 
                         ### Ekran ve Özellik Rehberi
                         - **Ingest Documents:** Kitapları kütüphane rafına dizip indekslemek gibidir; belgeleri işler ve vektörleri SQLite'a yazar.
@@ -858,22 +858,22 @@ def main() -> None:
                 else:
                     st.markdown(
                         """
-                        ### What is this project?
-                        Think of Grounded RAG as an **open-book exam**. Instead of guessing from memory or inventing an answer, the AI reads specific, verified documents first. This app stores documents in a SQLite vector store; Azure OpenAI embeddings (`text-embedding-3-small`) turn text into mathematical vectors to find the right passages, while `gpt-4.1-mini` crafts the final answer clearly.
+                        ### What is this engineering knowledge base?
+                        This Microsoft Foundry and local AI systems engineering knowledge base brings together verified technical material on offline inference, RAG ingestion, SQLite vector retrieval, Apple Silicon compatibility, and reproducible Python delivery. Before answering, the assistant reads these documents; Azure OpenAI embeddings (`text-embedding-3-small`) find the relevant passages, while `gpt-4.1-mini` produces a cited response.
 
-                        ### Why Pre-indexed Enterprise Documents instead of Dynamic Upload?
-                        In production, RAG systems run against curated, compliance-checked knowledge bases. This helps prevent data pollution, unexpected token-cost spikes, and adversarial prompt injections.
+                        ### Why Use a Pre-indexed Engineering Corpus?
+                        Production RAG systems query a curated, versioned, and verified engineering knowledge base for topics such as Foundry architecture, local deployment, and retrieval design. This helps prevent data pollution, unexpected token-cost spikes, and adversarial prompt injections.
 
                         **Future Work:** Multi-tenant isolated workspace uploads, drag-and-drop PDF/Docx parsing, and RBAC-controlled dynamic indexing are planned for future releases.
 
                         ### 🚀 How to Use?
                         1. **Step 1 (Ingest):** First, click **'Ingest Documents'** in the sidebar. It processes raw text files and stores their vector embeddings in SQLite.
-                        2. **Step 2 (Inspect):** Open the **'Knowledge Base'** expander to inspect the raw source documents and verify their contents.
+                        2. **Step 2 (Inspect):** Open the **'Engineering Knowledge Base'** expander to inspect the Foundry and local AI source documents.
                         3. **Step 3 (Ask & Explore):** Pick a pre-tested question from the **'💡 Question Library'** in the sidebar; click any chip in the initial **'Suggested Questions'** grid; or type your own custom question in the chat input at the bottom.
                         4. **Step 4 (Analyze):** Inspect the generated answer, verify the **Source Citations** breakdown, and check the latency/confidence telemetry.
 
                         ### Language Support
-                        The raw knowledge base documents are in English. English is the primary and recommended language for the highest retrieval accuracy and deterministic source citations. Turkish queries are supported by the underlying `gpt-4.1-mini`, but because the embeddings and knowledge base texts are in English, cross-lingual retrieval confidence may vary. Asking in English guarantees optimal citation matching.
+                        The internal engineering knowledge base sources are in English. English is the primary and recommended language for the highest retrieval accuracy and deterministic source citations. Turkish queries are supported by the underlying `gpt-4.1-mini`, but because the embeddings and technical source texts are in English, cross-lingual retrieval confidence may vary. Asking in English provides the strongest citation matching.
 
                         ### Screen & Feature Tour
                         - **Ingest Documents:** Like putting books on library shelves and cataloging them; it processes documents and writes their vectors to SQLite.
@@ -905,8 +905,8 @@ def main() -> None:
     st.markdown(
         """
         <section class="rag-hero">
-            <h1>Grounded Knowledge Assistant</h1>
-            <p>Enterprise Grounded RAG with Hybrid Search &amp; Deterministic Citations</p>
+            <h1>Microsoft Foundry &amp; Local AI Assistant</h1>
+            <p>Enterprise Grounded RAG for Local AI Architecture, SQLite Vector Retrieval &amp; Hardware Optimization</p>
             <div class="rag-badges">
                 <span class="rag-badge">Azure OpenAI · gpt-4.1-mini</span>
                 <span class="rag-badge">SQLite Vector</span>
