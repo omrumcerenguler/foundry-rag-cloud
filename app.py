@@ -561,6 +561,7 @@ def main() -> None:
             font-weight: 700;
             gap: 0.45rem;
             letter-spacing: 0.04em;
+            margin-bottom: 0.85rem;
             padding: 0.42rem 0.7rem;
         }
         .rag-status::before {
