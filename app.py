@@ -618,6 +618,23 @@ def main() -> None:
             background: rgba(103, 232, 249, 0.08);
             transform: none;
         }
+        .st-key-guide-content {
+            color: #c8d5e8;
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+        .st-key-guide-content h3 {
+            color: var(--rag-ink);
+            font-size: 0.95rem;
+            margin: 0.6rem 0 0.25rem;
+        }
+        .st-key-guide-content ul {
+            margin: 0.25rem 0 0.75rem;
+            padding-left: 1.1rem;
+        }
+        .st-key-guide-content li {
+            margin-bottom: 0.45rem;
+        }
         .rag-onboarding-banner {
             background: linear-gradient(135deg, rgba(103, 232, 249, 0.1), rgba(129, 140, 248, 0.1));
             border: 1px solid rgba(103, 232, 249, 0.3);
@@ -741,6 +758,45 @@ def main() -> None:
                             use_container_width=True,
                         ):
                             st.session_state["pending_prompt"] = question
+        with st.expander("📖 Guide & Architecture / Kılavuz", expanded=False):
+            guide_language = st.radio(
+                "Guide language",
+                ("🇹🇷 Türkçe", "🇬🇧 English"),
+                horizontal=True,
+                label_visibility="collapsed",
+                key="guide-language",
+            )
+            with st.container(key="guide-content"):
+                if guide_language == "🇹🇷 Türkçe":
+                    st.markdown(
+                        """
+                        ### Proje Nedir?
+                        RAG, yanıt vermeden önce kendi güvenilir dijital kütüphanesinde arama yapan bir yapay zekadır. Bu uygulama belgeleri SQLite vektör deposunda tutar ve Azure OpenAI embeddings ile doğru parçaları bulur. Böylece modelin bilgiyi uydurma (hallucination) ihtimali azalır.
+
+                        ### Ekrandaki Özellikler
+                        - **Ingest Documents:** Kitapları kütüphane rafına dizmek gibi belgeleri hafızaya kaydeder ve aranabilir hale getirir.
+                        - **Confidence & Latency:** Yanıtın güven puanını ve ne kadar sürede hazırlandığını gösterir.
+                        - **Source Citations:** Bilginin hangi belge ve sayfadan alındığını gösteren referansları listeler.
+                        - **Session Quota & Cooldown:** Sistemi yormamak ve güvenliği korumak için soru hakkını ve sorular arasındaki bekleme süresini yönetir.
+                        - **Copy Answer:** Yanıtı tek tıkla panoya kopyalar.
+                        """,
+                        unsafe_allow_html=False,
+                    )
+                else:
+                    st.markdown(
+                        """
+                        ### What is this project?
+                        RAG is an AI that checks its own reliable digital library before answering. This app stores documents in a SQLite vector store and uses Azure OpenAI embeddings to find the right passages. That helps reduce made-up answers (hallucinations).
+
+                        ### Screen Tour
+                        - **Ingest Documents:** Like putting books on library shelves, it saves documents to memory and makes them searchable.
+                        - **Confidence & Latency:** Shows how confident the answer is and how long it took to prepare.
+                        - **Source Citations:** Lists references showing which document and page supplied the information.
+                        - **Session Quota & Cooldown:** Manages your question allowance and the wait between questions to protect the system and keep it available.
+                        - **Copy Answer:** Copies the answer to your clipboard with one click.
+                        """,
+                        unsafe_allow_html=False,
+                    )
         threshold = st.slider(
             "Confidence threshold", 0.0, 1.0, settings.confidence_threshold, 0.01
         )
