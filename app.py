@@ -758,27 +758,32 @@ def main() -> None:
                             use_container_width=True,
                         ):
                             st.session_state["pending_prompt"] = question
-        with st.expander("📖 Guide & Architecture / Kılavuz", expanded=False):
+        with st.expander("📖 Guidebook & Architecture / Rehber", expanded=False):
             guide_language = st.radio(
                 "Guide language",
                 ("🇹🇷 Türkçe", "🇬🇧 English"),
                 horizontal=True,
                 label_visibility="collapsed",
-                key="guide-language",
+                key="guide_lang_choice",
             )
             with st.container(key="guide-content"):
                 if guide_language == "🇹🇷 Türkçe":
                     st.markdown(
                         """
                         ### Proje Nedir?
-                        RAG, yanıt vermeden önce kendi güvenilir dijital kütüphanesinde arama yapan bir yapay zekadır. Bu uygulama belgeleri SQLite vektör deposunda tutar ve Azure OpenAI embeddings ile doğru parçaları bulur. Böylece modelin bilgiyi uydurma (hallucination) ihtimali azalır.
+                        Grounded RAG'ı bir **açık kitap sınavı** gibi düşünebilirsiniz. Yapay zeka cevabı hafızasından tahmin etmek veya bilgi uydurmak yerine önce güvenilir, doğrulanmış belgeleri okur. Bu uygulama belgeleri SQLite vektör deposunda saklar; Azure OpenAI embeddings (`text-embedding-3-small`) metni matematiksel vektörlere çevirerek doğru pasajları bulur, `gpt-4.1-mini` ise son cevabı anlaşılır biçimde hazırlar.
 
-                        ### Ekrandaki Özellikler
-                        - **Ingest Documents:** Kitapları kütüphane rafına dizmek gibi belgeleri hafızaya kaydeder ve aranabilir hale getirir.
-                        - **Confidence & Latency:** Yanıtın güven puanını ve ne kadar sürede hazırlandığını gösterir.
-                        - **Source Citations:** Bilginin hangi belge ve sayfadan alındığını gösteren referansları listeler.
-                        - **Session Quota & Cooldown:** Sistemi yormamak ve güvenliği korumak için soru hakkını ve sorular arasındaki bekleme süresini yönetir.
-                        - **Copy Answer:** Yanıtı tek tıkla panoya kopyalar.
+                        ### Neden Dosya Yükleme Yerine Hazır Dökümanlar Var?
+                        Üretim ortamında RAG sistemleri, düzenlenmiş ve uyumluluk kontrollerinden geçmiş bilgi tabanlarıyla çalışır. Bu yaklaşım bilgi kirliliğini, beklenmedik token maliyet artışlarını ve kötü niyetli prompt injection saldırılarını azaltır.
+
+                        **Gelecek Çalışması:** Çok kiracılı ve birbirinden izole çalışma alanlarına dosya yükleme, PDF/Docx için sürükle-bırak ayrıştırma ve RBAC kontrollü dinamik indeksleme sonraki sürümlerde planlanmaktadır.
+
+                        ### Ekran ve Özellik Rehberi
+                        - **Ingest Documents:** Kitapları kütüphane rafına dizip indekslemek gibidir; belgeleri işler ve vektörleri SQLite'a yazar.
+                        - **Confidence & Latency:** Yanıtın matematiksel benzerlik güvenini ve sistemin tepki süresini gösterir.
+                        - **Source Citations & Chunks:** Bilginin tam olarak hangi kaynaktan geldiğini gösteren şeffaf kanıt kutusudur.
+                        - **Session Quota & Cooldown:** Sistemi koruyan güvenlik kalkanlarıdır: 8 soru kotası ve sorular arasında 4 saniye bekleme.
+                        - **Question Library:** Soldaki hazır soru kataloğuyla konuları tek tıkla keşfedip sistemi test edebilirsiniz.
                         """,
                         unsafe_allow_html=False,
                     )
@@ -786,14 +791,19 @@ def main() -> None:
                     st.markdown(
                         """
                         ### What is this project?
-                        RAG is an AI that checks its own reliable digital library before answering. This app stores documents in a SQLite vector store and uses Azure OpenAI embeddings to find the right passages. That helps reduce made-up answers (hallucinations).
+                        Think of Grounded RAG as an **open-book exam**. Instead of guessing from memory or inventing an answer, the AI reads specific, verified documents first. This app stores documents in a SQLite vector store; Azure OpenAI embeddings (`text-embedding-3-small`) turn text into mathematical vectors to find the right passages, while `gpt-4.1-mini` crafts the final answer clearly.
 
-                        ### Screen Tour
-                        - **Ingest Documents:** Like putting books on library shelves, it saves documents to memory and makes them searchable.
-                        - **Confidence & Latency:** Shows how confident the answer is and how long it took to prepare.
-                        - **Source Citations:** Lists references showing which document and page supplied the information.
-                        - **Session Quota & Cooldown:** Manages your question allowance and the wait between questions to protect the system and keep it available.
-                        - **Copy Answer:** Copies the answer to your clipboard with one click.
+                        ### Why Pre-indexed Enterprise Documents instead of Dynamic Upload?
+                        In production, RAG systems run against curated, compliance-checked knowledge bases. This helps prevent data pollution, unexpected token-cost spikes, and adversarial prompt injections.
+
+                        **Future Work:** Multi-tenant isolated workspace uploads, drag-and-drop PDF/Docx parsing, and RBAC-controlled dynamic indexing are planned for future releases.
+
+                        ### Screen & Feature Tour
+                        - **Ingest Documents:** Like putting books on library shelves and cataloging them; it processes documents and writes their vectors to SQLite.
+                        - **Confidence & Latency:** Shows mathematical similarity confidence and how quickly the system responded.
+                        - **Source Citations & Chunks:** Provides a transparent evidence box showing exactly which source supplied the information.
+                        - **Session Quota & Cooldown:** Security shields that provide an 8-question allowance and a 4-second wait between questions.
+                        - **Question Library:** The ready-made catalog on the left lets you explore topics and test the system with one click.
                         """,
                         unsafe_allow_html=False,
                     )
