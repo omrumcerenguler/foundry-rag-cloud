@@ -430,6 +430,63 @@ def main() -> None:
             background: linear-gradient(180deg, rgba(11, 17, 29, 0.97), rgba(10, 14, 24, 0.93));
             border-right: 1px solid var(--rag-line);
         }
+        [data-testid="stSidebar"] * {
+            color: #e2e8f0;
+        }
+        [data-testid="stSidebar"] .stButton > button,
+        [data-testid="stSidebar"] [data-testid="stLinkButton"] > a,
+        [data-testid="stSidebar"] [data-testid="stDownloadButton"] > button {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #ffffff !important;
+        }
+        [data-testid="stSidebar"] .stButton > button:hover,
+        [data-testid="stSidebar"] [data-testid="stLinkButton"] > a:hover,
+        [data-testid="stSidebar"] [data-testid="stDownloadButton"] > button:hover {
+            background: #162032 !important;
+            border-color: rgba(129, 140, 248, 0.72) !important;
+            color: #ffffff !important;
+        }
+        [data-testid="stSidebar"] [data-testid="stExpander"] {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        [data-testid="stSidebar"] [data-testid="stExpander"] summary,
+        [data-testid="stSidebar"] [data-testid="stExpander"] summary *,
+        [data-testid="stSidebar"] [data-testid="stExpander"] summary svg,
+        [data-testid="stSidebar"] [data-testid="stExpanderDetails"] * {
+            color: #e2e8f0 !important;
+            fill: currentColor !important;
+        }
+        [data-testid="stSidebar"] [data-testid="stExpanderDetails"] {
+            background: #162032 !important;
+        }
+        [data-testid="stSidebar"] [data-testid="stCaptionContainer"],
+        [data-testid="stSidebar"] [data-testid="stCaptionContainer"] * {
+            color: #94a3b8 !important;
+        }
+        [data-testid="stSidebar"] [data-testid="stSlider"] label,
+        [data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stMarkdownContainer"],
+        [data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stThumbValue"] {
+            color: #e2e8f0 !important;
+        }
+        [data-testid="stSidebar"] input,
+        [data-testid="stSidebar"] textarea,
+        [data-testid="stSidebar"] [data-baseweb="select"] > div {
+            background: #162032 !important;
+            color: #e2e8f0 !important;
+            -webkit-text-fill-color: #e2e8f0;
+        }
+        [data-testid="stSidebar"] [data-baseweb="tab-list"] {
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+        [data-testid="stSidebar"] [data-baseweb="tab"] {
+            color: #94a3b8 !important;
+        }
+        [data-testid="stSidebar"] [aria-selected="true"][data-baseweb="tab"] {
+            background: #162032 !important;
+            color: #ffffff !important;
+        }
         .rag-hero {
             padding: 1.35rem 0 1rem;
             border-bottom: 1px solid rgba(129, 140, 248, 0.2);
