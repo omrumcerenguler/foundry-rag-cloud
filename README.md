@@ -16,18 +16,20 @@ An enterprise-grade Grounded Retrieval-Augmented Generation (RAG) assistant for 
 
 ## English
 
+**Project Links:** [Live Demo](https://ceren-azure-ai.streamlit.app) · [GitHub Repository](https://github.com/omrumcerenguler/foundry-rag-cloud) · [🎥 Watch the Video Presentation](https://drive.google.com/file/d/1UYbE1xlZ2lMIpQ0jAjfGDEIGngWA5Tam/view?usp=sharing)
+
 ### Technology Stack
 
-| Area                      | Implementation                                                                                                                                        |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Language and runtime      | Python 3.10+; Python 3.13 is the tested local, CI, and container path.                                                                                |
-| Frontend and UX           | Streamlit with a dark glassmorphism layout, focused conversation flow, and a native JavaScript clipboard bridge.                                      |
-| Vector engine and storage | SQLite persistent storage, JSON-serialized vector embeddings, provenance metadata, and local cosine-similarity ranking.                               |
-| Cloud AI and models       | Azure OpenAI `text-embedding-3-small` for 1536-dimensional embeddings and `gpt-4.1-mini` for grounded answer generation.                              |
-| HTTP and configuration    | `httpx` API client, `python-dotenv` environment loading, and a Streamlit Secrets bridge for hosted deployments.                                       |
-| Providers and API         | Foundry Local and Azure OpenAI adapters; FastAPI with Pydantic v2 contracts, API-key authentication, CORS policy controls, and structured errors.     |
-| Observability and caching | Query latency, similarity confidence, match count, model identity, and in-memory cache HIT/MISS telemetry.                                            |
-| Security and reliability  | Eight-query session quota, four-second cooldown, bounded context, validation, atomic ingestion replacement, and curated ingestion boundaries.         |
+| Area                      | Implementation                                                                                                                                                   |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Language and runtime      | Python 3.10+; Python 3.13 is the tested local, CI, and container path.                                                                                           |
+| Frontend and UX           | Streamlit with a dark glassmorphism layout, focused conversation flow, and a native JavaScript clipboard bridge.                                                 |
+| Vector engine and storage | SQLite persistent storage, JSON-serialized vector embeddings, provenance metadata, and local cosine-similarity ranking.                                          |
+| Cloud AI and models       | Azure OpenAI `text-embedding-3-small` for 1536-dimensional embeddings and `gpt-4.1-mini` for grounded answer generation.                                         |
+| HTTP and configuration    | `httpx` API client, `python-dotenv` environment loading, and a Streamlit Secrets bridge for hosted deployments.                                                  |
+| Providers and API         | Foundry Local and Azure OpenAI adapters; FastAPI with Pydantic v2 contracts, API-key authentication, CORS policy controls, and structured errors.                |
+| Observability and caching | Query latency, similarity confidence, match count, model identity, and in-memory cache HIT/MISS telemetry.                                                       |
+| Security and reliability  | Eight-query session quota, four-second cooldown, bounded context, validation, atomic ingestion replacement, and curated ingestion boundaries.                    |
 | Quality and DevSecOps     | 69 unit and integration tests; `pytest-cov` with an 85% coverage gate enforced in GitHub Actions CI; strict MyPy, Ruff, Flake8, Bandit, `pip-audit`, and Docker. |
 
 ### Architecture and Data Flow
@@ -169,21 +171,23 @@ The suite contains 69 passing tests across API behavior, Azure provider handling
 
 ### Test Suite Matrix
 
-| Suite | Explicit verification |
-| --- | --- |
-| `test_api.py` | Health/readiness states, grounded query payloads, structured 422 errors, API-key enforcement, 429 mapping, atomic ingest summaries, and degraded index health. |
-| `test_azure_provider.py` | Endpoint normalization, `Retry-After` handling, 429 exhaustion, and bounded 5xx retries. |
-| `test_chunker.py` | Deterministic chunk boundaries and metadata plus empty, binary, and invalid-text handling. |
-| `test_cli.py` | CLI flag aliases and user-friendly interactive-chat interruption handling. |
-| `test_evaluate.py` | Structured evaluation behavior when a provider mode is unavailable. |
-| `test_hardening.py` | Streamlit Secrets, malformed input rejection, safe citation fallback, NaN/Inf/zero-vector rejection, corrupted SQLite data, provider failure sanitization, and evaluation edge cases. |
-| `test_ingestion.py` | Null-byte/binary skipping, recursive relative provenance, and preservation of the existing index after provider or vector-dimension failure. |
-| `test_service.py` | Grounded generation, confidence fallback, empty-query rejection, uncited-answer fallback, and context-budget enforcement. |
-| `test_store.py` | Cosine ranking, atomic rollback, zero-norm and dimension validation, WAL/busy-timeout configuration, deterministic tie-breaking, metadata health, and missing provenance handling. |
+| Suite                    | Explicit verification                                                                                                                                                                 |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `test_api.py`            | Health/readiness states, grounded query payloads, structured 422 errors, API-key enforcement, 429 mapping, atomic ingest summaries, and degraded index health.                        |
+| `test_azure_provider.py` | Endpoint normalization, `Retry-After` handling, 429 exhaustion, and bounded 5xx retries.                                                                                              |
+| `test_chunker.py`        | Deterministic chunk boundaries and metadata plus empty, binary, and invalid-text handling.                                                                                            |
+| `test_cli.py`            | CLI flag aliases and user-friendly interactive-chat interruption handling.                                                                                                            |
+| `test_evaluate.py`       | Structured evaluation behavior when a provider mode is unavailable.                                                                                                                   |
+| `test_hardening.py`      | Streamlit Secrets, malformed input rejection, safe citation fallback, NaN/Inf/zero-vector rejection, corrupted SQLite data, provider failure sanitization, and evaluation edge cases. |
+| `test_ingestion.py`      | Null-byte/binary skipping, recursive relative provenance, and preservation of the existing index after provider or vector-dimension failure.                                          |
+| `test_service.py`        | Grounded generation, confidence fallback, empty-query rejection, uncited-answer fallback, and context-budget enforcement.                                                             |
+| `test_store.py`          | Cosine ranking, atomic rollback, zero-norm and dimension validation, WAL/busy-timeout configuration, deterministic tie-breaking, metadata health, and missing provenance handling.    |
 
 ---
 
 ## 🇹🇷 Türkçe Dokümantasyon
+
+**Proje Bağlantıları:** [Canlı Demo](https://ceren-azure-ai.streamlit.app) · [GitHub Repository](https://github.com/omrumcerenguler/foundry-rag-cloud) · [🎥 Video Sunumunu İzle](https://drive.google.com/file/d/1UYbE1xlZ2lMIpQ0jAjfGDEIGngWA5Tam/view?usp=sharing)
 
 Microsoft Foundry & Local AI Assistant, Microsoft Foundry ve yerel yapay zeka sistemleri mühendisliği için geliştirilmiş, kurumsal nitelikte bir Grounded RAG uygulamasıdır. Düzenlenmiş teknik bilgi tabanından kaynak getirir, kaynakla desteklenmeyen yanıtlar için güvenli geri dönüş uygular ve sorgu sürecini gerçek zamanlı telemetri ile görünür kılar.
 
@@ -340,14 +344,14 @@ ruff check .
 
 ### Test Paketi Matrisi
 
-| Paket | Açıkça doğrulanan davranışlar |
-| --- | --- |
-| `test_api.py` | Sağlık/hazır olma durumları, kaynaklı sorgu yanıtları, yapılandırılmış 422 hataları, API anahtarı denetimi, 429 eşlemesi, atomik içeri aktarma özeti ve bozulmuş indeks sağlığı. |
-| `test_azure_provider.py` | Uç nokta normalizasyonu, `Retry-After` işleme, 429 sınırının tükenmesi ve sınırlı 5xx yeniden denemeleri. |
-| `test_chunker.py` | Deterministik parça sınırları ve metadata ile boş, ikili ve geçersiz metin işleme davranışı. |
-| `test_cli.py` | CLI bayrak kısaltmaları ve etkileşimli sohbet kesintilerinin kullanıcı dostu yönetimi. |
-| `test_evaluate.py` | Sağlayıcı modu kullanılamadığında yapılandırılmış değerlendirme davranışı. |
-| `test_hardening.py` | Streamlit Secrets, hatalı girdi reddi, güvenli kaynak fallback'i, NaN/Inf/sıfır vektör reddi, bozuk SQLite verisi, sağlayıcı hata sterilizasyonu ve değerlendirme sınır durumları. |
-| `test_ingestion.py` | Null byte/ikili dosya atlama, özyinelemeli göreli provenance ve sağlayıcı ya da vektör boyutu hatasında mevcut indeksin korunması. |
-| `test_service.py` | Kaynaklı yanıt üretimi, güven eşiği fallback'i, boş sorgu reddi, kaynaksız yanıt fallback'i ve bağlam bütçesi uygulaması. |
-| `test_store.py` | Cosine sıralama, atomik geri alma, sıfır norm ve boyut doğrulaması, WAL/yoğunluk zaman aşımı ayarları, deterministik eşitlik çözümü, metadata sağlığı ve eksik provenance işleme. |
+| Paket                    | Açıkça doğrulanan davranışlar                                                                                                                                                      |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `test_api.py`            | Sağlık/hazır olma durumları, kaynaklı sorgu yanıtları, yapılandırılmış 422 hataları, API anahtarı denetimi, 429 eşlemesi, atomik içeri aktarma özeti ve bozulmuş indeks sağlığı.   |
+| `test_azure_provider.py` | Uç nokta normalizasyonu, `Retry-After` işleme, 429 sınırının tükenmesi ve sınırlı 5xx yeniden denemeleri.                                                                          |
+| `test_chunker.py`        | Deterministik parça sınırları ve metadata ile boş, ikili ve geçersiz metin işleme davranışı.                                                                                       |
+| `test_cli.py`            | CLI bayrak kısaltmaları ve etkileşimli sohbet kesintilerinin kullanıcı dostu yönetimi.                                                                                             |
+| `test_evaluate.py`       | Sağlayıcı modu kullanılamadığında yapılandırılmış değerlendirme davranışı.                                                                                                         |
+| `test_hardening.py`      | Streamlit Secrets, hatalı girdi reddi, güvenli kaynak fallback'i, NaN/Inf/sıfır vektör reddi, bozuk SQLite verisi, sağlayıcı hata sterilizasyonu ve değerlendirme sınır durumları. |
+| `test_ingestion.py`      | Null byte/ikili dosya atlama, özyinelemeli göreli provenance ve sağlayıcı ya da vektör boyutu hatasında mevcut indeksin korunması.                                                 |
+| `test_service.py`        | Kaynaklı yanıt üretimi, güven eşiği fallback'i, boş sorgu reddi, kaynaksız yanıt fallback'i ve bağlam bütçesi uygulaması.                                                          |
+| `test_store.py`          | Cosine sıralama, atomik geri alma, sıfır norm ve boyut doğrulaması, WAL/yoğunluk zaman aşımı ayarları, deterministik eşitlik çözümü, metadata sağlığı ve eksik provenance işleme.  |
