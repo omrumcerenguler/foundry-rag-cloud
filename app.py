@@ -549,7 +549,7 @@ def main() -> None:
             font-size: 1rem;
             margin-bottom: 0.25rem;
         }
-        .rag-onboarding {
+        .rag-onboarding-banner {
             background: linear-gradient(135deg, rgba(103, 232, 249, 0.1), rgba(129, 140, 248, 0.1));
             border: 1px solid rgba(103, 232, 249, 0.3);
             border-radius: 9px;
@@ -558,7 +558,7 @@ def main() -> None:
             margin: 0.1rem 0 1.2rem;
             padding: 0.85rem 1rem;
         }
-        .rag-onboarding strong {
+        .rag-onboarding-banner strong {
             color: var(--rag-cyan);
         }
         @media (max-width: 640px) {
@@ -714,15 +714,14 @@ def main() -> None:
             if message.get("observability"):
                 _render_response_observability(message)
 
-    if cast(int, metadata.get("total_chunk_count", 0)) == 0:
-        st.markdown(
-            """
-            <div class="rag-onboarding">
-                💡 <strong>Quick Setup:</strong> If you are visiting for the first time or vector chunks show 0, please click <strong>'Ingest Documents'</strong> in the sidebar. This parses the knowledge base files and loads their vector embeddings into SQLite so the assistant can retrieve answers.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    st.markdown(
+        """
+        <div class="rag-onboarding-banner">
+            💡 <strong>How It Works:</strong> This assistant is connected to an indexed SQLite vector store with Azure OpenAI embeddings. You can directly click any sample question below, ask custom questions, or re-index the knowledge base from the sidebar.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     st.subheader("💡 Suggested Questions")
     question_tabs = st.tabs([category for category, _ in QUESTION_LIBRARY])
