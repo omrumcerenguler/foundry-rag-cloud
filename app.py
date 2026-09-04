@@ -731,6 +731,19 @@ def main() -> None:
             metadata = service.vector_store.get_index_metadata() or {}
         if not isinstance(metadata, dict):
             raise RuntimeError("vector store metadata is malformed")
+    except ValueError as error:
+        st.error(_friendly_error(f"RAG configuration error: {error}"))
+        return
+    except RuntimeError as error:
+        if api_mode and str(error) == "backend connection failed":
+            st.error(
+                "RAG API connection failed. For direct local Streamlit mode, leave "
+                "RAG_API_URL unset; for API mode, run the backend and use "
+                "http://127.0.0.1:8000."
+            )
+        else:
+            st.error(_friendly_error("RAG service is unavailable. Check the backend configuration."))
+        return
     except Exception:
         st.error(_friendly_error("RAG service is unavailable. Check the backend configuration."))
         return
