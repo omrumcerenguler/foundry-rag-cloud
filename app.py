@@ -533,22 +533,6 @@ def main() -> None:
             color: #ffffff;
             transform: translateY(-2px);
         }
-        .rag-empty-state {
-            background: linear-gradient(135deg, rgba(20, 31, 49, 0.84), rgba(42, 31, 72, 0.54));
-            border: 1px solid rgba(129, 140, 248, 0.28);
-            border-left: 3px solid var(--rag-cyan);
-            border-radius: 9px;
-            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-            color: #b4c1d4;
-            margin: 0.4rem 0 1.25rem;
-            padding: 1rem 1.15rem;
-        }
-        .rag-empty-state strong {
-            color: var(--rag-ink);
-            display: block;
-            font-size: 1rem;
-            margin-bottom: 0.25rem;
-        }
         .rag-onboarding-banner {
             background: linear-gradient(135deg, rgba(103, 232, 249, 0.1), rgba(129, 140, 248, 0.1));
             border: 1px solid rgba(103, 232, 249, 0.3);
@@ -693,17 +677,6 @@ def main() -> None:
         unsafe_allow_html=True,
     )
     messages = st.session_state.get("messages", [])
-    if not messages:
-        st.markdown(
-            """
-            <div class="rag-empty-state">
-                <strong>Ready when you are</strong>
-                Choose a suggested question below or ask about the indexed knowledge base.
-                Answers include grounded source citations when the documents support them.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
     for message in messages:
         with st.chat_message(message["role"]):
             st.markdown(message["answer"])
@@ -717,7 +690,12 @@ def main() -> None:
     st.markdown(
         """
         <div class="rag-onboarding-banner">
-            💡 <strong>How It Works:</strong> This assistant is connected to an indexed SQLite vector store with Azure OpenAI embeddings. You can directly click any sample question below, ask custom questions, or re-index the knowledge base from the sidebar.
+            <strong>⚡ Getting Started &amp; How It Works</strong>
+            <p>This RAG assistant retrieves factual context from a local SQLite vector store using Azure OpenAI embeddings (<code>text-embedding-3-small</code> &amp; <code>gpt-4.1-mini</code>).</p>
+            <ul>
+                <li><strong>First Run / Re-indexing:</strong> If the indexed chunks show 0 or you update files, click <strong>'Ingest Documents'</strong> in the sidebar to build vector embeddings.</li>
+                <li><strong>Ask Questions:</strong> Click any sample question below or type your own query to get grounded answers with deterministic citations.</li>
+            </ul>
         </div>
         """,
         unsafe_allow_html=True,
