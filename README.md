@@ -18,16 +18,17 @@ An enterprise-grade Grounded Retrieval-Augmented Generation (RAG) assistant for 
 
 ### Technology Stack
 
-| Area | Implementation |
-| --- | --- |
-| Language and runtime | Python 3.10+; Python 3.13 is the tested local, CI, and container path. |
-| Frontend and UX | Streamlit with a dark glassmorphism layout, focused conversation flow, and a native JavaScript clipboard bridge. |
-| Vector engine and storage | SQLite persistent storage, JSON-serialized vector embeddings, provenance metadata, and local cosine-similarity ranking. |
-| Cloud AI and models | Azure OpenAI `text-embedding-3-small` for 1536-dimensional embeddings and `gpt-4.1-mini` for grounded answer generation. |
-| Providers and API | Foundry Local and Azure OpenAI adapters; FastAPI service boundary with Pydantic contracts and API-key support. |
-| Observability and caching | Query latency, similarity confidence, match count, model identity, and in-memory cache HIT/MISS telemetry. |
-| Security and reliability | Eight-query session quota, four-second cooldown, bounded context, validation, atomic ingestion replacement, and curated ingestion boundaries. |
-| Quality and delivery | 69 unit and integration tests, strict MyPy, Ruff, Docker images, Docker Compose, and GitHub Actions CI. |
+| Area                      | Implementation                                                                                                                                |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Language and runtime      | Python 3.10+; Python 3.13 is the tested local, CI, and container path.                                                                        |
+| Frontend and UX           | Streamlit with a dark glassmorphism layout, focused conversation flow, and a native JavaScript clipboard bridge.                              |
+| Vector engine and storage | SQLite persistent storage, JSON-serialized vector embeddings, provenance metadata, and local cosine-similarity ranking.                       |
+| Cloud AI and models       | Azure OpenAI `text-embedding-3-small` for 1536-dimensional embeddings and `gpt-4.1-mini` for grounded answer generation.                      |
+| HTTP and configuration    | `httpx` API client, `python-dotenv` environment loading, and a Streamlit Secrets bridge for hosted deployments.                                |
+| Providers and API         | Foundry Local and Azure OpenAI adapters; FastAPI with Pydantic v2 contracts, API-key authentication, CORS policy controls, and structured errors. |
+| Observability and caching | Query latency, similarity confidence, match count, model identity, and in-memory cache HIT/MISS telemetry.                                    |
+| Security and reliability  | Eight-query session quota, four-second cooldown, bounded context, validation, atomic ingestion replacement, and curated ingestion boundaries. |
+| Quality and DevSecOps     | 69 unit and integration tests, `pytest-cov` with an 85% coverage gate, strict MyPy, Ruff, Flake8, Bandit, `pip-audit`, Docker, and GitHub Actions CI. |
 
 ### Architecture and Data Flow
 
@@ -74,7 +75,16 @@ The bundled corpus is an internal engineering knowledge base covering Microsoft 
 
 - Eight questions per browser session and a four-second request cooldown protect the public demo from accidental burst traffic.
 - Curated, pre-indexed documents create a controlled data boundary that reduces untrusted-content and prompt-injection exposure.
-- Ingestion skips unsafe or unreadable inputs and replaces the index atomically, preserving the previous usable index on failure.
+- Ingestion skips binary, null-byte, unreadable, and unsupported files and replaces the index atomically, preserving the previous usable index on failure.
+- SQLite uses WAL journaling, a 30-second busy timeout, and lock-protected access; equal scores are resolved deterministically.
+- Azure OpenAI requests parse `Retry-After` for 429 responses and retry eligible 429/5xx failures with exponential backoff.
+- Container images run as a non-root user. Docker Compose applies read-only service filesystems, restricted `tmpfs` mounts, health-based startup, and CPU/memory limits.
+
+### Evaluation and Operations
+
+- `evaluate.py` benchmarks grounded retrieval with Precision@3, Mean Reciprocal Rank (MRR), citation grounding, and latency measurements.
+- `main.py` provides a unified CLI for ingestion, single-query retrieval, interactive chat, index health checks, and evaluation runs.
+- `healthcheck.py` supplies the container readiness probe, while `export_openapi.py` generates the OpenAPI contract artifact.
 
 **Focused user experience**
 
@@ -137,16 +147,17 @@ Microsoft Foundry & Local AI Assistant, Microsoft Foundry ve yerel yapay zeka si
 
 ### Teknoloji Altyapısı
 
-| Alan | Uygulama |
-| --- | --- |
-| Dil ve çalışma ortamı | Python 3.10+; yerel geliştirme, CI ve container ortamında doğrulanan sürüm Python 3.13'tür. |
-| Arayüz ve kullanıcı deneyimi | Koyu cam efektli Streamlit arayüzü, sohbet odaklı akış ve tarayıcı tarafında çalışan JavaScript pano kopyalama köprüsü. |
-| Vektör motoru ve depolama | Kalıcı SQLite depolama, JSON olarak serileştirilmiş vektör embedding'leri, provenance metadatası ve yerel cosine similarity sıralaması. |
-| Bulut yapay zekası ve modeller | 1536 boyutlu embedding'ler için Azure OpenAI `text-embedding-3-small`; kaynaklı yanıt üretimi için `gpt-4.1-mini`. |
-| Sağlayıcılar ve API | Foundry Local ve Azure OpenAI adaptörleri; Pydantic sözleşmeleri ve API anahtarı desteğiyle FastAPI servis sınırı. |
-| Gözlemlenebilirlik ve önbellek | Sorgu gecikmesi, benzerlik güveni, eşleşme sayısı, model bilgisi ve bellek içi Cache HIT/MISS telemetrisi. |
-| Güvenlik ve dayanıklılık | Sekiz sorguluk oturum kotası, dört saniyelik bekleme, sınırlı bağlam, girdi doğrulama, atomik indeks güncellemesi ve kontrollü veri sınırı. |
-| Kalite ve teslim | 69 birim ve entegrasyon testi, strict MyPy, Ruff, Docker imajları, Docker Compose ve GitHub Actions CI. |
+| Alan                           | Uygulama                                                                                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dil ve çalışma ortamı          | Python 3.10+; yerel geliştirme, CI ve container ortamında doğrulanan sürüm Python 3.13'tür.                                                 |
+| Arayüz ve kullanıcı deneyimi   | Koyu cam efektli Streamlit arayüzü, sohbet odaklı akış ve tarayıcı tarafında çalışan JavaScript pano kopyalama köprüsü.                     |
+| Vektör motoru ve depolama      | Kalıcı SQLite depolama, JSON olarak serileştirilmiş vektör embedding'leri, provenance metadatası ve yerel cosine similarity sıralaması.     |
+| Bulut yapay zekası ve modeller | 1536 boyutlu embedding'ler için Azure OpenAI `text-embedding-3-small`; kaynaklı yanıt üretimi için `gpt-4.1-mini`.                          |
+| HTTP ve yapılandırma           | `httpx` API istemcisi, `python-dotenv` ile ortam değişkeni yükleme ve barındırılan kurulumlar için Streamlit Secrets köprüsü.               |
+| Sağlayıcılar ve API            | Foundry Local ve Azure OpenAI adaptörleri; Pydantic v2 sözleşmeleri, API anahtarı doğrulaması, CORS politikaları ve yapılandırılmış hata yanıtlarıyla FastAPI servis sınırı. |
+| Gözlemlenebilirlik ve önbellek | Sorgu gecikmesi, benzerlik güveni, eşleşme sayısı, model bilgisi ve bellek içi Cache HIT/MISS telemetrisi.                                  |
+| Güvenlik ve dayanıklılık       | Sekiz sorguluk oturum kotası, dört saniyelik bekleme, sınırlı bağlam, girdi doğrulama, atomik indeks güncellemesi ve kontrollü veri sınırı. |
+| Kalite ve DevSecOps            | 69 birim ve entegrasyon testi, `%85` kod kapsamı eşiğiyle `pytest-cov`, strict MyPy, Ruff, Flake8, Bandit, `pip-audit`, Docker ve GitHub Actions CI. |
 
 ### Mimari ve Veri Akışı
 
@@ -193,7 +204,16 @@ Birlikte gelen bilgi tabanı Microsoft Foundry, çevrim dışı çıkarım, Pyth
 
 - Tarayıcı oturumu başına sekiz sorgu ve dört saniyelik istek bekleme süresi, genel kullanıma açık demoyu ani istek yoğunluğuna karşı korur.
 - Önceden indekslenen düzenlenmiş belgeler, güvenilmeyen içerik ve prompt injection riskini azaltan kontrollü bir veri sınırı oluşturur.
-- İçeri aktarma süreci güvenli olmayan veya okunamayan dosyaları atlar; hata durumunda önceki kullanılabilir indeksi koruyacak şekilde atomik güncelleme yapar.
+- İçeri aktarma süreci ikili, null byte içeren, okunamayan ve desteklenmeyen dosyaları atlar; hata durumunda önceki kullanılabilir indeksi koruyacak şekilde atomik güncelleme yapar.
+- SQLite, WAL günlük modu, 30 saniyelik yoğunluk zaman aşımı ve kilitle korunan erişim kullanır; eşit skorlar deterministik biçimde sıralanır.
+- Azure OpenAI istekleri, 429 yanıtlarındaki `Retry-After` başlığını işler; uygun 429 ve 5xx hatalarını üstel geri çekilmeyle yeniden dener.
+- Container imajları root olmayan kullanıcıyla çalışır. Docker Compose; salt okunur servis dosya sistemleri, kısıtlı `tmpfs` bağlamaları, sağlık kontrolüne bağlı başlatma ve CPU/bellek sınırları uygular.
+
+### Değerlendirme ve Operasyonlar
+
+- `evaluate.py`, kaynaklı getirme kalitesini Precision@3, Ortalama Karşılıklı Sıra (MRR), kaynaklama doğruluğu ve gecikme ölçümleriyle değerlendirir.
+- `main.py`, içeri aktarma, tekil sorgu, etkileşimli sohbet, indeks sağlık kontrolü ve değerlendirme çalıştırmaları için birleşik bir CLI sunar.
+- `healthcheck.py` container hazır olma denetimini sağlar; `export_openapi.py` ise OpenAPI sözleşmesi çıktısını üretir.
 
 **Odaklı kullanıcı deneyimi**
 
