@@ -622,6 +622,7 @@ def main() -> None:
             color: #c8d5e8;
             font-size: 0.82rem;
             line-height: 1.5;
+            overflow-wrap: anywhere;
         }
         .st-key-guide-content h3 {
             color: var(--rag-ink);
@@ -778,6 +779,15 @@ def main() -> None:
 
                         **Gelecek Çalışması:** Çok kiracılı ve birbirinden izole çalışma alanlarına dosya yükleme, PDF/Docx için sürükle-bırak ayrıştırma ve RBAC kontrollü dinamik indeksleme sonraki sürümlerde planlanmaktadır.
 
+                        ### 🚀 How to Use / Nasıl Kullanılır?
+                        1. **Adım 1 (Ingest):** Önce sidebar'daki **'Ingest Documents'** düğmesine tıklayın. Ham metin dosyaları işlenir ve vektör embeddings SQLite'a kaydedilir.
+                        2. **Adım 2 (Inspect):** Ham kaynak belgeleri incelemek ve içeriklerini doğrulamak için **'Knowledge Base'** expander'ını açın.
+                        3. **Adım 3 (Ask & Explore):** Sidebar'daki **'💡 Question Library'** içinden test edilmiş bir soru seçin; başlangıçtaki **'Suggested Questions'** grid'inde bir chip'e tıklayın; ya da alttaki chat input'a kendi sorunuzu yazın.
+                        4. **Adım 4 (Analyze):** Oluşan yanıtı inceleyin, **Source Citations** dökümünü doğrulayın ve latency/confidence telemetry değerlerini kontrol edin.
+
+                        ### Dil Desteği
+                        Bilgi tabanındaki ham belgeler İngilizcedir. En yüksek retrieval doğruluğu ve deterministik source citation eşleşmesi için İngilizce, birincil ve önerilen dildir. Türkçe sorular `gpt-4.1-mini` tarafından desteklenir; ancak embeddings ve bilgi tabanı metinleri İngilizce olduğu için diller arası retrieval confidence değişebilir. En iyi citation eşleşmesini garanti etmek için İngilizce sormanız önerilir.
+
                         ### Ekran ve Özellik Rehberi
                         - **Ingest Documents:** Kitapları kütüphane rafına dizip indekslemek gibidir; belgeleri işler ve vektörleri SQLite'a yazar.
                         - **Confidence & Latency:** Yanıtın matematiksel benzerlik güvenini ve sistemin tepki süresini gösterir.
@@ -797,6 +807,15 @@ def main() -> None:
                         In production, RAG systems run against curated, compliance-checked knowledge bases. This helps prevent data pollution, unexpected token-cost spikes, and adversarial prompt injections.
 
                         **Future Work:** Multi-tenant isolated workspace uploads, drag-and-drop PDF/Docx parsing, and RBAC-controlled dynamic indexing are planned for future releases.
+
+                        ### 🚀 How to Use / Nasıl Kullanılır?
+                        1. **Step 1 (Ingest):** First, click **'Ingest Documents'** in the sidebar. It processes raw text files and stores their vector embeddings in SQLite.
+                        2. **Step 2 (Inspect):** Open the **'Knowledge Base'** expander to inspect the raw source documents and verify their contents.
+                        3. **Step 3 (Ask & Explore):** Pick a pre-tested question from the **'💡 Question Library'** in the sidebar; click any chip in the initial **'Suggested Questions'** grid; or type your own custom question in the chat input at the bottom.
+                        4. **Step 4 (Analyze):** Inspect the generated answer, verify the **Source Citations** breakdown, and check the latency/confidence telemetry.
+
+                        ### Language Support
+                        The raw knowledge base documents are in English. English is the primary and recommended language for the highest retrieval accuracy and deterministic source citations. Turkish queries are supported by the underlying `gpt-4.1-mini`, but because the embeddings and knowledge base texts are in English, cross-lingual retrieval confidence may vary. Asking in English guarantees optimal citation matching.
 
                         ### Screen & Feature Tour
                         - **Ingest Documents:** Like putting books on library shelves and cataloging them; it processes documents and writes their vectors to SQLite.
