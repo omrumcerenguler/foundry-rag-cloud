@@ -1,8 +1,8 @@
-# Foundry RAG Cloud
+# Microsoft Foundry & Local AI Assistant
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Open%20Streamlit%20App-ff4b4b?logo=streamlit&logoColor=white)](https://ceren-azure-ai.streamlit.app)
 [![CI](https://github.com/omrumcerenguler/foundry-rag-cloud/actions/workflows/ci.yml/badge.svg)](https://github.com/omrumcerenguler/foundry-rag-cloud/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.63.0-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![Azure OpenAI](https://img.shields.io/badge/Azure%20OpenAI-gpt--4.1--mini-0078D4)](https://azure.microsoft.com/products/ai-services/openai-service)
 [![Tests](https://img.shields.io/badge/Tests-69%20passed-2EA44F)](tests/)
@@ -17,9 +17,9 @@
 
 ### Executive Summary
 
-Foundry RAG Cloud is a production-oriented, hybrid-deployment retrieval-augmented generation assistant. It provides a Streamlit experience backed either by Azure OpenAI or an offline Foundry Local runtime, with FastAPI available as a service boundary and SQLite as an embedded vector store.
+Microsoft Foundry & Local AI Assistant is an enterprise-grade grounded RAG reference application for local AI systems engineering. Its curated internal engineering knowledge base covers Microsoft Foundry, offline inference, Apple Silicon (ARM64) compatibility, Python environment reproducibility, RAG ingestion, and SQLite vector retrieval.
 
-The implementation focuses on grounded answers rather than unconstrained generation. Documents are recursively ingested, deterministically chunked, embedded, persisted with provenance, retrieved by cosine similarity, injected under a fixed context budget, and returned with source citations. If retrieval confidence is too low or the model does not cite a retrieved source, the service returns a safe fallback instead of presenting an unsupported answer.
+The Streamlit experience runs with Azure OpenAI `text-embedding-3-small` and `gpt-4.1-mini`, or an offline Foundry Local provider. Documents are recursively ingested, deterministically chunked, embedded, persisted with provenance, retrieved by cosine similarity, injected under a fixed context budget, and returned with citations. Low-confidence retrieval or an answer that lacks a matching retrieved citation produces a safe fallback rather than an unsupported answer.
 
 This repository is a reference implementation for resilient RAG service design. It does not claim to provide Azure account-level financial enforcement in code: Azure TPM quotas and budget alerts must be configured separately in the Azure resource and subscription.
 
@@ -37,7 +37,11 @@ This repository is a reference implementation for resilient RAG service design. 
 | Packaging | Multi-stage Python 3.13 slim API image and standalone Streamlit image |
 | Automation | GitHub Actions compile, lint, type, test, security, and container jobs |
 
-The term hybrid refers to the local-to-cloud provider architecture and deployment modes. The current retrieval implementation is semantic cosine search; BM25 sparse retrieval and cross-encoder reranking are roadmap items, not present features.
+The term hybrid refers to the local-to-cloud provider architecture and deployment modes. The current retrieval implementation is semantic cosine search with similarity confidence scoring; BM25 sparse retrieval and cross-encoder reranking are roadmap items, not present features.
+
+### Knowledge Domain
+
+The bundled six-document corpus is an internal engineering knowledge base, not a generic industry dataset. It covers local AI privacy and repeatability, Python virtual environments, RAG ingestion, SQLite embedding storage, Apple Silicon compatibility, and a Microsoft Foundry Local delivery plan.
 
 ### End-to-End Architecture
 
@@ -95,15 +99,16 @@ These values are deployment policy recommendations. They are not provisioned by 
 
 The Streamlit application provides:
 
-- Glassmorphism dark SaaS styling with cyan/indigo/violet accents and responsive behavior.
-- A categorized question library with 15 grounded questions across three domains.
+- An explicitly enforced dark glassmorphism theme via `.streamlit/config.toml`, with light-mode contrast overrides for sidebar controls.
+- A five-category sidebar Question Library for architecture, retrieval, ingestion, hardware optimization, and roadmap questions.
 - Knowledge-base document cards with domain, scope, summaries, and concept tags.
 - A single collapsed **Source Citations & Match Context** inspector containing source IDs, cosine scores, relevance bars, and passage snippets.
 - Response telemetry pills for latency, confidence, match count, model deployment, and cache HIT/MISS.
-- A progressive query status indicator for retrieval and grounded synthesis.
+- An onboarding banner and suggested-question view that clear after the first successful interaction, keeping the chat focused.
 - Markdown conversation/report download and conversation clearing without resetting the session quota.
-- Copy-to-clipboard support for assistant answers.
+- A zero-rerun client-side clipboard control for assistant answers, using the Clipboard API with `execCommand` fallback for Safari and mobile browsers, plus `Copied!` feedback.
 - Visible session quota metric, progress bar, cooldown warnings, and near-limit callouts.
+- A bilingual English/Turkish sidebar guidebook covering onboarding, Foundry/local-RAG architecture, and cross-lingual retrieval guidance.
 
 ### Repository Structure
 
@@ -158,12 +163,12 @@ The Streamlit application provides:
 
 ### Local Setup
 
-Requirements: Python 3.13 for the tested path, an Azure OpenAI resource for cloud mode, or the optional Foundry Local runtime for offline mode.
+Requirements: Python 3.10+ (Python 3.13 is the tested CI and container path), an Azure OpenAI resource for cloud mode, or the optional Foundry Local runtime for offline mode.
 
 ```sh
 git clone git@github.com:omrumcerenguler/foundry-rag-cloud.git
 cd foundry-rag-cloud
-python3.13 -m venv .venv
+python -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 cp .env.example .env
 ```
@@ -184,20 +189,19 @@ RAG_DATABASE_PATH=stores/rag.db
 
 The Azure endpoint should be the resource base URL. The provider normalizes a trailing slash and also strips an optional `/openai/v1` suffix before constructing deployment URLs.
 
-Index the bundled corpus and run the API:
+Index the bundled engineering corpus:
 
 ```sh
 PYTHONPATH=. .venv/bin/python main.py ingest
-PYTHONPATH=. .venv/bin/uvicorn api:app --host 127.0.0.1 --port 8000
 ```
 
-In another terminal, run the direct Streamlit UI:
+Run the direct Streamlit UI:
 
 ```sh
-PYTHONPATH=. .venv/bin/streamlit run app.py
+.venv/bin/streamlit run app.py
 ```
 
-For API mode, set `RAG_API_URL=http://127.0.0.1:8000` and provide the matching `API_KEY`. Streamlit Community Cloud uses `app.py` as the Main file path; place flat TOML secrets in its Secrets field. `config.py` bridges scalar `st.secrets` values into the environment settings.
+For API mode, start `PYTHONPATH=. .venv/bin/uvicorn api:app --host 127.0.0.1 --port 8000`, set `RAG_API_URL=http://127.0.0.1:8000`, and provide the matching `API_KEY`. Streamlit Community Cloud uses `app.py` as the Main file path; place flat TOML secrets in its Secrets field. `config.py` bridges scalar `st.secrets` values into the environment settings.
 
 ### Docker and Compose
 
@@ -272,12 +276,18 @@ PYTHONPATH=. .venv/bin/python export_openapi.py --output openapi.json
 
 ### Quality Assurance
 
-The repository currently verifies:
+The repository has 69 tests across API, Azure provider, chunking, CLI, evaluation, hardening, ingestion, service, and SQLite storage behavior. Run the requested local quality checks with:
 
 ```sh
-PYTHONPATH=. .venv/bin/pytest -q
-PYTHONPATH=. .venv/bin/mypy --strict api.py app.py config.py core factory.py ingestion.py evaluate.py main.py providers stores export_openapi.py healthcheck.py --ignore-missing-imports
+.venv/bin/mypy --strict app.py
 .venv/bin/ruff check .
+.venv/bin/python -m pytest
+```
+
+The broader CI/security checks are:
+
+```sh
+PYTHONPATH=. .venv/bin/mypy --strict api.py app.py config.py core factory.py ingestion.py evaluate.py main.py providers stores export_openapi.py healthcheck.py --ignore-missing-imports
 .venv/bin/flake8 . --exclude=.venv,.git,__pycache__
 .venv/bin/bandit -r api.py app.py config.py core factory.py ingestion.py evaluate.py main.py providers stores export_openapi.py healthcheck.py
 .venv/bin/pip-audit -r requirements.txt
@@ -295,11 +305,11 @@ The latest local verification produced **69 passing tests**, coverage above the 
 
 ### Yönetici Özeti
 
-Foundry RAG Cloud; Azure OpenAI, offline Foundry Local, FastAPI, Streamlit ve SQLite bileşenlerini birleştiren üretim odaklı bir Retrieval-Augmented Generation asistanıdır. Sistem, serbest ve temelsiz LLM üretimi yerine kaynak belgelerle temellendirilmiş cevaplar üretmeye odaklanır.
+Microsoft Foundry & Local AI Assistant; Microsoft Foundry, local AI systems engineering, Apple Silicon (ARM64) uyumluluğu, SQLite vector retrieval ve Azure OpenAI entegrasyonu için üretim odaklı bir Grounded RAG referans uygulamasıdır. İç engineering knowledge base; offline inference, Python ortamlarının tekrarlanabilirliği, RAG ingestion ve Foundry Local teslim planı gibi teknik konuları kapsar.
 
 Belgeler recursive olarak keşfedilir, deterministic biçimde chunk'lara ayrılır, embedding'leri ve provenance metadata'sı ile SQLite'a yazılır. Sorgular cosine similarity ile aranır, confidence threshold uygulanır, context 12.000 karakterle sınırlandırılır ve cevapta retrieved source citation bulunmuyorsa güvenli fallback döndürülür.
 
-Buradaki hibrit yaklaşım, LOCAL/AZURE_CLOUD provider mimarisini ve direct/API deployment seçeneklerini ifade eder. Mevcut retrieval katmanı semantic cosine search kullanır; BM25 sparse search ve reranking henüz uygulanmamıştır.
+Buradaki hibrit yaklaşım, LOCAL/AZURE_CLOUD provider mimarisini ve direct/API deployment seçeneklerini ifade eder. Mevcut retrieval katmanı similarity confidence score üreten semantic cosine search kullanır; BM25 sparse search ve reranking henüz uygulanmamıştır.
 
 ### Teknoloji Stack'i
 
@@ -353,14 +363,15 @@ Bu TPM ve budget ayarları repository kodu tarafından provision edilmez; Azure 
 
 ### UI/UX ve Observability
 
-- Glassmorphism dark SaaS arayüzü, cyan/indigo/violet vurgular ve responsive layout.
-- Üç domain altında toplam 15 teknik soruluk tabbed question library.
-- Altı belge için Domain, Scope, Summary ve key-concept tag'leri içeren Knowledge Base explorer.
+- `.streamlit/config.toml` ile zorlanan dark glassmorphism arayüzü ve sidebar light-mode contrast override'ları.
+- Architecture, Retrieval, Ingestion, Hardware & Optimization ve Roadmap kategorilerinde sidebar Question Library.
+- Altı engineering belgesi için Domain, Scope, Summary ve key-concept tag'leri içeren Knowledge Base explorer.
 - Tek collapsed `Source Citations & Match Context` container'ı içinde source ID, cosine score, relevance bar ve passage snippet.
 - Latency, confidence, match count, model deployment ve cache HIT/MISS telemetry pill'leri.
-- Retrieval ve Azure synthesis adımlarını gösteren progressive status indicator.
-- Markdown conversation/report download, clear conversation ve copy-to-clipboard aksiyonları.
+- İlk etkileşimden sonra kapanan onboarding banner ve suggested-question görünümüyle chat odaklı deneyim.
+- Safari ve mobil `execCommand` fallback'li, rerun oluşturmayan JavaScript copy-to-clipboard aksiyonu ve `Copied!` feedback'i.
 - Session quota metric'i, progress bar'ı ve near-limit uyarıları.
+- Onboarding, Foundry/local RAG mimarisi ve cross-lingual retrieval açıklamalarını içeren iki dilli sidebar rehberi.
 
 ### Repository Yapısı
 
@@ -401,7 +412,7 @@ Bu TPM ve budget ayarları repository kodu tarafından provision edilmez; Azure 
 ```sh
 git clone git@github.com:omrumcerenguler/foundry-rag-cloud.git
 cd foundry-rag-cloud
-python3.13 -m venv .venv
+python -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 cp .env.example .env
 ```
@@ -424,11 +435,10 @@ Endpoint resource base URL olmalıdır. Provider trailing slash'i normalize eder
 
 ```sh
 PYTHONPATH=. .venv/bin/python main.py ingest
-PYTHONPATH=. .venv/bin/uvicorn api:app --host 127.0.0.1 --port 8000
-PYTHONPATH=. .venv/bin/streamlit run app.py
+.venv/bin/streamlit run app.py
 ```
 
-Streamlit Community Cloud için **Main file path** `app.py` olmalıdır. Secrets alanına düz TOML anahtarları ekleyin; `config.py`, scalar `st.secrets` değerlerini environment settings'e bağlar.
+API modunda `PYTHONPATH=. .venv/bin/uvicorn api:app --host 127.0.0.1 --port 8000` ile API'yi başlatın, `RAG_API_URL=http://127.0.0.1:8000` tanımlayın ve eşleşen `API_KEY` sağlayın. Streamlit Community Cloud için **Main file path** `app.py` olmalıdır. Secrets alanına düz TOML anahtarları ekleyin; `config.py`, scalar `st.secrets` değerlerini environment settings'e bağlar.
 
 Docker Compose:
 
@@ -450,9 +460,15 @@ PYTHONPATH=. .venv/bin/python evaluate.py \
   --output eval_report.json \
   --mode AZURE_CLOUD
 
-PYTHONPATH=. .venv/bin/pytest -q
-PYTHONPATH=. .venv/bin/mypy --strict api.py app.py config.py core factory.py ingestion.py evaluate.py main.py providers stores export_openapi.py healthcheck.py --ignore-missing-imports
+.venv/bin/mypy --strict app.py
 .venv/bin/ruff check .
+.venv/bin/python -m pytest
+```
+
+69 test; API, Azure provider, chunking, CLI, evaluation, hardening, ingestion, service ve SQLite storage davranışını kapsar. Ek CI/güvenlik kontrolleri:
+
+```sh
+PYTHONPATH=. .venv/bin/mypy --strict api.py app.py config.py core factory.py ingestion.py evaluate.py main.py providers stores export_openapi.py healthcheck.py --ignore-missing-imports
 .venv/bin/flake8 . --exclude=.venv,.git,__pycache__
 .venv/bin/bandit -r api.py app.py config.py core factory.py ingestion.py evaluate.py main.py providers stores export_openapi.py healthcheck.py
 .venv/bin/pip-audit -r requirements.txt
