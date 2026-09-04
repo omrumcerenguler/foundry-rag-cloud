@@ -66,33 +66,44 @@ KNOWLEDGE_BASE_DOCUMENTS: tuple[KnowledgeBaseDocument, ...] = (
 
 QUESTION_LIBRARY: tuple[tuple[str, tuple[str, ...]], ...] = (
     (
-        "🏗️ Architecture & Phases",
+        "🏗️ Architecture",
         (
             "How does SQLite store embeddings and support cosine similarity search?",
-            "What are the three phases and week ranges in the project delivery plan?",
             "How does the RAG assistant separate ingestion, storage, retrieval, and generation?",
             "Why is SQLite an appropriate vector store for a small local knowledge base?",
-            "What deliverables are planned for the Testing & Wrap-up phase?",
         ),
     ),
     (
-        "⚙️ Data Ingestion & RAG Pipeline",
+        "🔎 Retrieval",
         (
-            "Why is local AI useful when prompts and documents must remain private?",
-            "What steps transform source documents into searchable RAG vectors?",
             "How do chunking and embeddings prepare passages for semantic retrieval?",
-            "What network dependency is removed by running inference locally?",
             "How does the ingestion pipeline connect source text to later search?",
+            "How does deterministic citation rendering keep answers grounded?",
         ),
     ),
     (
-        "💻 Runtime & Hardware Optimization",
+        "⚙️ Ingestion",
+        (
+            "What steps transform source documents into searchable RAG vectors?",
+            "Why is local AI useful when prompts and documents must remain private?",
+            "What happens when I click Ingest Documents in the sidebar?",
+        ),
+    ),
+    (
+        "💻 Hardware & Optimization",
         (
             "How does a Python virtual environment isolate project dependencies?",
             "Why should Apple Silicon users choose ARM64 Python and compatible wheels?",
             "How does a virtual environment improve reproducibility across machines?",
             "What package compatibility concerns matter for local AI on macOS?",
-            "How do Python environments and Apple Silicon compatibility work together for local models?",
+        ),
+    ),
+    (
+        "🗺️ Roadmap",
+        (
+            "What are the three phases and week ranges in the project delivery plan?",
+            "What deliverables are planned for the Testing & Wrap-up phase?",
+            "What does the six-week project delivery plan cover?",
         ),
     ),
 )
@@ -596,6 +607,17 @@ def main() -> None:
             color: #ffffff;
             transform: translateY(-2px);
         }
+        .st-key-question-catalog .stButton > button {
+            background: rgba(255, 255, 255, 0.025);
+            font-size: 0.78rem;
+            min-height: 2.35rem;
+            padding: 0.35rem 0.55rem;
+            text-align: left;
+        }
+        .st-key-question-catalog .stButton > button:hover {
+            background: rgba(103, 232, 249, 0.08);
+            transform: none;
+        }
         .rag-onboarding-banner {
             background: linear-gradient(135deg, rgba(103, 232, 249, 0.1), rgba(129, 140, 248, 0.1));
             border: 1px solid rgba(103, 232, 249, 0.3);
@@ -707,6 +729,18 @@ def main() -> None:
                         + "</div>",
                         unsafe_allow_html=True,
                     )
+        with st.expander("💡 Question Library / Catalog", expanded=False):
+            st.caption("Browse categorized questions to explore the knowledge base.")
+            with st.container(key="question-catalog"):
+                for category, questions in QUESTION_LIBRARY:
+                    st.markdown(f"**{category}**")
+                    for index, question in enumerate(questions):
+                        if st.button(
+                            question,
+                            key=f"catalog-{category}-{index}",
+                            use_container_width=True,
+                        ):
+                            st.session_state["pending_prompt"] = question
         threshold = st.slider(
             "Confidence threshold", 0.0, 1.0, settings.confidence_threshold, 0.01
         )
@@ -750,32 +784,33 @@ def main() -> None:
             if message.get("observability"):
                 _render_response_observability(message)
 
-    st.markdown(
-        """
-        <div class="rag-onboarding-banner">
-            <strong>⚡ Getting Started &amp; How It Works</strong>
-            <p>This RAG assistant retrieves factual context from a local SQLite vector store using Azure OpenAI embeddings (<code>text-embedding-3-small</code> &amp; <code>gpt-4.1-mini</code>).</p>
-            <ul>
-                <li><strong>First Run / Re-indexing:</strong> If the indexed chunks show 0 or you update files, click <strong>'Ingest Documents'</strong> in the sidebar to build vector embeddings.</li>
-                <li><strong>Ask Questions:</strong> Click any sample question below or type your own query to get grounded answers with deterministic citations.</li>
-            </ul>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    if not messages:
+        st.markdown(
+            """
+            <div class="rag-onboarding-banner">
+                <strong>⚡ Getting Started &amp; How It Works</strong>
+                <p>This RAG assistant retrieves factual context from a local SQLite vector store using Azure OpenAI embeddings (<code>text-embedding-3-small</code> &amp; <code>gpt-4.1-mini</code>).</p>
+                <ul>
+                    <li><strong>First Run / Re-indexing:</strong> If the indexed chunks show 0 or you update files, click <strong>'Ingest Documents'</strong> in the sidebar to build vector embeddings.</li>
+                    <li><strong>Ask Questions:</strong> Click any sample question below or type your own query to get grounded answers with deterministic citations.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    st.subheader("💡 Suggested Questions")
-    question_tabs = st.tabs([category for category, _ in QUESTION_LIBRARY])
-    for tab, (_, questions) in zip(question_tabs, QUESTION_LIBRARY):
-        with tab:
-            question_columns = st.columns(2)
-            for index, suggested_question in enumerate(questions):
-                if question_columns[index % 2].button(
-                    suggested_question,
-                    key=f"suggested-question-{index}-{questions[0][:12]}",
-                    use_container_width=True,
-                ):
-                    st.session_state["pending_prompt"] = suggested_question
+        st.subheader("💡 Suggested Questions")
+        question_tabs = st.tabs([category for category, _ in QUESTION_LIBRARY])
+        for tab, (_, questions) in zip(question_tabs, QUESTION_LIBRARY):
+            with tab:
+                question_columns = st.columns(2)
+                for index, suggested_question in enumerate(questions):
+                    if question_columns[index % 2].button(
+                        suggested_question,
+                        key=f"suggested-question-{index}-{questions[0][:12]}",
+                        use_container_width=True,
+                    ):
+                        st.session_state["pending_prompt"] = suggested_question
 
     prompt = st.session_state.pop("pending_prompt", None)
     if prompt is None:
