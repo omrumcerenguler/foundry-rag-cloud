@@ -179,14 +179,19 @@ def _api_request(method: str, path: str, **kwargs: Any) -> dict[str, object]:
         response = httpx.request(
             method, f"{base_url}{path}", headers=_api_headers(), timeout=30.0, **kwargs
         )
+        if response.status_code == 429:
+            raise RuntimeError("backend rate limit reached")
+        response.raise_for_status()
+        payload = response.json()
     except httpx.TimeoutException as exc:
         raise RuntimeError("backend request timed out") from exc
     except httpx.RequestError as exc:
         raise RuntimeError("backend connection failed") from exc
-    if response.status_code == 429:
-        raise RuntimeError("backend rate limit reached")
-    response.raise_for_status()
-    payload = response.json()
+    except httpx.HTTPStatusError as exc:
+        raise RuntimeError(f"backend returned {exc.response.status_code}") from exc
+    except ValueError as exc:
+        raise RuntimeError("API returned malformed JSON") from exc
+
     if not isinstance(payload, dict):
         raise RuntimeError("API returned malformed data")
     return cast(dict[str, object], payload)
