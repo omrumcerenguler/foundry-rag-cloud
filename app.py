@@ -306,9 +306,10 @@ def _conversation_markdown(messages: list[dict[str, object]]) -> str:
     return "\n".join(sections)
 
 
-def _render_copy_button(answer: str) -> None:
+def _render_copy_button(answer: str, message_key: str) -> None:
     """Render a browser clipboard action for one assistant response."""
-    copy_key = f"copy_{hashlib.sha256(answer.encode()).hexdigest()[:10]}"
+    # message_key guarantees uniqueness even when two messages share identical answer text.
+    copy_key = f"copy_{message_key}_{hashlib.sha256(answer.encode()).hexdigest()[:10]}"
     encoded_answer = json.dumps(answer, ensure_ascii=True).replace("</", "<\\/")
     component_html = f"""
         <style>
@@ -376,7 +377,7 @@ def _render_copy_button(answer: str) -> None:
         components.html(component_html, height=35, scrolling=False)
 
 
-def _render_response_observability(message: dict[str, object]) -> None:
+def _render_response_observability(message: dict[str, object], message_key: str) -> None:
     """Render compact telemetry pills for an assistant response."""
     telemetry = cast(dict[str, object], message.get("observability", {}))
     latency_ms = _float_value(telemetry.get("latency_ms"))
@@ -394,7 +395,7 @@ def _render_response_observability(message: dict[str, object]) -> None:
         "</div>",
         unsafe_allow_html=True,
     )
-    _render_copy_button(str(message.get("answer", "")))
+    _render_copy_button(str(message.get("answer", "")), message_key)
 
 
 def _render_citation_inspector(sources: list[dict[str, object]]) -> None:
@@ -988,7 +989,7 @@ def main() -> None:
         unsafe_allow_html=True,
     )
     messages = st.session_state.get("messages", [])
-    for message in messages:
+    for message_index, message in enumerate(messages):
         with st.chat_message(message["role"]):
             st.markdown(message["answer"])
             if message.get("sources"):
@@ -996,7 +997,7 @@ def main() -> None:
                     cast(list[dict[str, object]], message["sources"])
                 )
             if message.get("observability"):
-                _render_response_observability(message)
+                _render_response_observability(message, f"msg-{message_index}")
 
     if not messages:
         st.markdown(
