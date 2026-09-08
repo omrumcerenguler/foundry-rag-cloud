@@ -1,4 +1,4 @@
-# Microsoft Foundry & Local AI Assistant
+# Foundry RAG Cloud
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Open%20App-FF4B4B?logo=streamlit&logoColor=white)](https://ceren-azure-ai.streamlit.app)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
@@ -12,7 +12,7 @@
 
 **[Open the live application](https://ceren-azure-ai.streamlit.app)**
 
-An enterprise-grade Grounded Retrieval-Augmented Generation (RAG) assistant for Microsoft Foundry and local AI systems engineering. It retrieves from a curated technical knowledge base, enforces citation-backed answers with safe fallbacks, and exposes real-time retrieval telemetry.
+An enterprise-grade Grounded Retrieval-Augmented Generation (RAG) platform powered by Azure OpenAI and a custom in-house SQLite vector engine. It retrieves from a curated technical knowledge base, enforces citation-backed answers with safe fallbacks, and exposes real-time retrieval telemetry.
 
 ## English
 
