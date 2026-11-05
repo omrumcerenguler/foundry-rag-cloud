@@ -99,10 +99,16 @@ class _AzureProvider:
     def _post(
         self, resource: str, deployment: str, payload: dict[str, object]
     ) -> dict[str, object]:
-        url = f"{self.endpoint}/openai/deployments/{deployment}/{resource}"
+        url = (
+            f"{self.endpoint}/openai/deployments/{deployment}/{resource}"
+            f"?api-version={self.api_version}"
+        )
+        return self._post_json(url, payload)
+
+    def _post_json(self, url: str, payload: dict[str, object]) -> dict[str, object]:
         for attempt in range(4):
             request = Request(
-                f"{url}?api-version={self.api_version}",
+                url,
                 data=json.dumps(payload).encode("utf-8"),
                 headers={"Content-Type": "application/json", "api-key": self.api_key},
                 method="POST",
@@ -233,18 +239,24 @@ class AzureOpenAIChatProvider(_AzureProvider, BaseChatProvider):
         self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float
     ) -> str:
         """Create one grounded chat completion."""
-        response = self._post(
-            "chat/completions",
-            self.deployment,
-            {
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                "max_tokens": max_tokens,
-                "temperature": temperature,
-            },
-        )
+        payload: dict[str, object] = {
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ]
+        }
+        if self.deployment.casefold() == "gpt-6-luna":
+            payload.update(
+                model=self.deployment,
+                max_completion_tokens=max_tokens,
+                reasoning_effort="none",
+            )
+            response = self._post_json(
+                f"{self.endpoint}/openai/v1/chat/completions", payload
+            )
+        else:
+            payload.update(max_tokens=max_tokens, temperature=temperature)
+            response = self._post("chat/completions", self.deployment, payload)
         try:
             content = response["choices"][0]["message"]["content"]  # type: ignore[index]
         except (KeyError, IndexError, TypeError) as exc:

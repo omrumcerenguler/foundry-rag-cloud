@@ -5,6 +5,7 @@ from urllib.error import HTTPError
 
 import providers.azure_openai as azure
 from providers.azure_openai import (
+    AzureOpenAIChatProvider,
     AzureOpenAIEmbeddingProvider,
     AzureRateLimitError,
     _AzureProvider,
@@ -24,6 +25,35 @@ class Response(io.BytesIO):
 
     def __exit__(self, *_args):
         return False
+
+
+def test_luna_sends_a_bounded_v1_chat_request(monkeypatch) -> None:
+    requests = []
+
+    def fake_urlopen(request, **_kwargs: object):
+        requests.append(request)
+        return Response(b'{"choices": [{"message": {"content": "Grounded answer"}}]}')
+
+    monkeypatch.setattr(azure, "urlopen", fake_urlopen)
+    provider = AzureOpenAIChatProvider(
+        "https://resource.openai.azure.com", "key", "2024-10-21", "gpt-6-luna"
+    )
+    answer = provider.generate_response("Use sources", "Question", 512, 0.2)
+    assert answer == "Grounded answer"
+    (request,) = requests
+    assert request.full_url == (
+        "https://resource.openai.azure.com/openai/v1/chat/completions"
+    )
+    assert request.get_header("Api-key") == "key"
+    assert json.loads(request.data) == {
+        "model": "gpt-6-luna",
+        "messages": [
+            {"role": "system", "content": "Use sources"},
+            {"role": "user", "content": "Question"},
+        ],
+        "max_completion_tokens": 512,
+        "reasoning_effort": "none",
+    }
 
 
 def test_429_retries_and_honors_retry_after(monkeypatch) -> None:

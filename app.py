@@ -901,7 +901,7 @@ def main() -> None:
                     st.markdown(
                         """
                         ### Bu Engineering Knowledge Base Nedir?
-                        Bu Microsoft Foundry ve local AI systems engineering bilgi tabanı; offline inference, RAG ingestion, SQLite vector retrieval, Apple Silicon uyumluluğu ve tekrarlanabilir Python teslimi için doğrulanmış teknik belgeleri bir araya getirir. Asistan yanıt üretmeden önce bu belgeleri okur; Azure OpenAI embeddings (`text-embedding-3-small`) ilgili pasajları bulur, `gpt-4.1-mini` ise kaynak gösteren yanıtı hazırlar.
+                        Bu Microsoft Foundry ve local AI systems engineering bilgi tabanı; offline inference, RAG ingestion, SQLite vector retrieval, Apple Silicon uyumluluğu ve tekrarlanabilir Python teslimi için doğrulanmış teknik belgeleri bir araya getirir. Asistan yanıt üretmeden önce bu belgeleri okur; embedding modeli ilgili pasajları bulur, sohbet modeli ise kaynak gösteren yanıtı hazırlar.
 
                         ### Neden Hazır Bir Engineering Corpus Kullanılıyor?
                         Üretim RAG sistemlerinde Foundry mimarisi, local deployment ve retrieval tasarımı gibi teknik konular; düzenlenmiş, sürümlenmiş ve doğrulanmış bir engineering knowledge base üzerinden sorgulanır. Bu yaklaşım bilgi kirliliğini, beklenmedik token maliyet artışlarını ve kötü niyetli prompt injection saldırılarını azaltır.
@@ -915,7 +915,7 @@ def main() -> None:
                         4. **Adım 4 (Analyze):** Oluşan yanıtı inceleyin, **Source Citations** dökümünü doğrulayın ve latency/confidence telemetry değerlerini kontrol edin.
 
                         ### Dil Desteği
-                        Internal engineering knowledge base içindeki teknik kaynaklar İngilizcedir. En yüksek retrieval doğruluğu ve deterministik source citation eşleşmesi için İngilizce, birincil ve önerilen dildir. Türkçe sorular `gpt-4.1-mini` tarafından desteklenir; ancak embeddings ve teknik kaynak metinleri İngilizce olduğu için diller arası retrieval confidence değişebilir. En iyi citation eşleşmesi için İngilizce sormanız önerilir.
+                        Bilgi tabanındaki teknik kaynaklar İngilizcedir. Türkçe de soru sorabilirsiniz. Diller arası aramada eşleşme puanı değişebileceği için en iyi kaynak eşleşmesi için İngilizce önerilir.
 
                         ### Ekran ve Özellik Rehberi
                         - **Ingest Documents:** Kitapları kütüphane rafına dizip indekslemek gibidir; belgeleri işler ve vektörleri SQLite'a yazar.
@@ -930,7 +930,7 @@ def main() -> None:
                     st.markdown(
                         """
                         ### What is this engineering knowledge base?
-                        This Microsoft Foundry and local AI systems engineering knowledge base brings together verified technical material on offline inference, RAG ingestion, SQLite vector retrieval, Apple Silicon compatibility, and reproducible Python delivery. Before answering, the assistant reads these documents; Azure OpenAI embeddings (`text-embedding-3-small`) find the relevant passages, while `gpt-4.1-mini` produces a cited response.
+                        This Microsoft Foundry and local AI systems engineering knowledge base brings together verified technical material on offline inference, RAG ingestion, SQLite vector retrieval, Apple Silicon compatibility, and reproducible Python delivery. The embedding model finds relevant passages, and the chat model uses them to produce a cited answer.
 
                         ### Why Use a Pre-indexed Engineering Corpus?
                         Production RAG systems query a curated, versioned, and verified engineering knowledge base for topics such as Foundry architecture, local deployment, and retrieval design. This helps prevent data pollution, unexpected token-cost spikes, and adversarial prompt injections.
@@ -944,7 +944,7 @@ def main() -> None:
                         4. **Step 4 (Analyze):** Inspect the generated answer, verify the **Source Citations** breakdown, and check the latency/confidence telemetry.
 
                         ### Language Support
-                        The internal engineering knowledge base sources are in English. English is the primary and recommended language for the highest retrieval accuracy and deterministic source citations. Turkish queries are supported by the underlying `gpt-4.1-mini`, but because the embeddings and technical source texts are in English, cross-lingual retrieval confidence may vary. Asking in English provides the strongest citation matching.
+                        The knowledge base sources are in English. You can also ask questions in Turkish. Retrieval scores can vary across languages, so English is recommended for the closest source matches.
 
                         ### Screen & Feature Tour
                         - **Ingest Documents:** Like putting books on library shelves and cataloging them; it processes documents and writes their vectors to SQLite.
@@ -985,7 +985,7 @@ def main() -> None:
             <h1>Foundry RAG Cloud</h1>
             <p>Enterprise Grounded RAG powered by Azure OpenAI, SQLite Vector Retrieval &amp; Production Telemetry</p>
             <div class="rag-badges">
-                <span class="rag-badge">Azure OpenAI · gpt-4.1-mini</span>
+                <span class="rag-badge">Azure OpenAI</span>
                 <span class="rag-badge">SQLite Vector</span>
                 <span class="rag-badge">Session Rate-Limited</span>
             </div>
@@ -1009,7 +1009,7 @@ def main() -> None:
             """
             <div class="rag-onboarding-banner">
                 <strong>⚡ Getting Started &amp; How It Works</strong>
-                <p>This RAG assistant retrieves factual context from a local SQLite vector store using Azure OpenAI embeddings (<code>text-embedding-3-small</code> &amp; <code>gpt-4.1-mini</code>).</p>
+                <p>This RAG assistant searches a local SQLite vector index and uses the retrieved passages to answer with citations.</p>
                 <ul>
                     <li><strong>First Run / Re-indexing:</strong> If the indexed chunks show 0 or you update files, click <strong>'Ingest Documents'</strong> in the sidebar to build vector embeddings.</li>
                     <li><strong>Ask Questions:</strong> Click any sample question below or type your own query to get grounded answers with deterministic citations.</li>
