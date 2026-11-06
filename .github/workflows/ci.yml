@@ -9,10 +9,12 @@ permissions:
 
 jobs:
   lint-and-type:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
       - name: Install development dependencies
@@ -27,7 +29,7 @@ jobs:
         run: mypy --strict api.py app.py config.py core factory.py ingestion.py evaluate.py main.py providers stores export_openapi.py healthcheck.py --ignore-missing-imports
 
   tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: lint-and-type
     env:
       RAG_MODE: AZURE_CLOUD
@@ -35,8 +37,10 @@ jobs:
       AZURE_OPENAI_API_KEY: ci-test-key
       PYTHONPATH: .
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
       - name: Install dependencies
@@ -45,10 +49,12 @@ jobs:
         run: pytest --cov=api --cov=config --cov=core --cov=stores --cov=ingestion --cov=providers --cov-report=term-missing --cov-fail-under=85
 
   security:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
       - name: Install security tools
@@ -59,10 +65,12 @@ jobs:
         run: pip-audit -r requirements.txt
 
   container:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: tests
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Build image
         run: docker build --tag foundry-rag:${{ github.sha }} .
       - name: Validate non-root image
