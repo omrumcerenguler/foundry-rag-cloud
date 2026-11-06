@@ -1,8 +1,8 @@
 # Foundry RAG Cloud
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Open%20App-FF4B4B?logo=streamlit&logoColor=white)](https://ceren-azure-ai.streamlit.app)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.63.0-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.66.1-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![Azure OpenAI](https://img.shields.io/badge/Azure%20OpenAI-gpt--4.1--mini-0078D4)](https://azure.microsoft.com/products/ai-services/openai-service)
 ![SQLite Vector](https://img.shields.io/badge/SQLite-Vector%20Retrieval-003B57?logo=sqlite&logoColor=white)
 [![Pytest](https://img.shields.io/badge/Pytest-69%2F69%20Passed-2EA44F?logo=pytest&logoColor=white)](tests/)
@@ -22,7 +22,7 @@ An enterprise-grade Grounded Retrieval-Augmented Generation (RAG) platform power
 
 | Area                      | Implementation                                                                                                                                                   |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Language and runtime      | Python 3.10+; Python 3.13 is the tested local, CI, and container path.                                                                                           |
+| Language and runtime      | Python 3.11+; Python 3.13 is the tested local, CI, and container path.                                                                                           |
 | Frontend and UX           | Streamlit with a dark glassmorphism layout, focused conversation flow, and a native JavaScript clipboard bridge.                                                 |
 | Vector engine and storage | SQLite persistent storage, JSON-serialized vector embeddings, provenance metadata, and local cosine-similarity ranking.                                          |
 | Cloud AI and models       | Azure OpenAI `text-embedding-3-small` for 1536-dimensional embeddings and `gpt-4.1-mini` for grounded answer generation.                                         |
@@ -124,7 +124,7 @@ The bundled corpus is an internal engineering knowledge base covering Microsoft 
 
 ### Quickstart
 
-Prerequisites: Python 3.10+, an Azure OpenAI endpoint and API key for `AZURE_CLOUD` mode, or a configured Foundry Local runtime for `LOCAL` mode.
+Prerequisites: Python 3.11+, an Azure OpenAI endpoint and API key for `AZURE_CLOUD` mode, or a configured Foundry Local runtime for `LOCAL` mode.
 
 ```sh
 git clone git@github.com:omrumcerenguler/foundry-rag-cloud.git
@@ -195,7 +195,7 @@ Microsoft Foundry & Local AI Assistant, Microsoft Foundry ve yerel yapay zeka si
 
 | Alan                           | Uygulama                                                                                                                                                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dil ve çalışma ortamı          | Python 3.10+; yerel geliştirme, CI ve container ortamında doğrulanan sürüm Python 3.13'tür.                                                                                  |
+| Dil ve çalışma ortamı          | Python 3.11+; yerel geliştirme, CI ve container ortamında doğrulanan sürüm Python 3.13'tür.                                                                                  |
 | Arayüz ve kullanıcı deneyimi   | Koyu cam efektli Streamlit arayüzü, sohbet odaklı akış ve tarayıcı tarafında çalışan JavaScript pano kopyalama köprüsü.                                                      |
 | Vektör motoru ve depolama      | Kalıcı SQLite depolama, JSON olarak serileştirilmiş vektör embedding'leri, provenance metadatası ve yerel cosine similarity sıralaması.                                      |
 | Bulut yapay zekası ve modeller | 1536 boyutlu embedding'ler için Azure OpenAI `text-embedding-3-small`; kaynaklı yanıt üretimi için `gpt-4.1-mini`.                                                           |
@@ -297,7 +297,7 @@ Birlikte gelen bilgi tabanı Microsoft Foundry, çevrim dışı çıkarım, Pyth
 
 ### Hızlı Başlangıç
 
-Gereksinimler: Python 3.10+, `AZURE_CLOUD` modu için Azure OpenAI endpoint'i ve API anahtarı veya `LOCAL` modu için yapılandırılmış Foundry Local çalışma zamanı.
+Gereksinimler: Python 3.11+, `AZURE_CLOUD` modu için Azure OpenAI endpoint'i ve API anahtarı veya `LOCAL` modu için yapılandırılmış Foundry Local çalışma zamanı.
 
 ```sh
 git clone git@github.com:omrumcerenguler/foundry-rag-cloud.git
